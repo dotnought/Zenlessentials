@@ -108,7 +108,7 @@ function Hero() {
 }
 
 function UpNext({ next, tracker }: { next: NarrativeEntry | undefined; tracker: Tracker }) {
-  const previousCore = next && core.slice().reverse().find((entry) => entry.chronologicalOrder < next.chronologicalOrder)
+  const previousCore = next && core.filter((entry) => entry.chronologicalOrder < next.chronologicalOrder).at(-1)
   const optional = next && !next.optional && tracker.preferences.showOptional ? roots.filter((entry) =>
     entry.optional && entry.chronologicalOrder < next.chronologicalOrder &&
     entry.chronologicalOrder > (previousCore?.chronologicalOrder ?? 0) &&
@@ -132,7 +132,7 @@ function Overview({ tracker }: { tracker: Tracker }) {
   const total = totals(entries, tracker.progress)
   return <section className="panel overview">
     <div className="panel-heading"><h2>Story Progress</h2><Link to="/stats" className="icon-button" aria-label="View statistics"><ArrowUpRight size={17} /></Link></div>
-    <div className="overview-total"><Ring percent={total.percent} /><div><strong>{total.done}<span> / {total.total}</span></strong><small>stories completed</small></div></div>
+    <div className="overview-total"><Ring percent={total.percent} /><div><strong>{total.done}<span> / {total.total}</span></strong><small>entries completed</small></div></div>
     <div className="mini-stats">
       {([
         ['main', 'Main Story', ['main']],
@@ -233,12 +233,14 @@ function Empty({ reset }: { reset?: () => void }) {
 function Timeline({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry }) {
   const [params] = useSearchParams()
   const location = useLocation()
-  const seasonValue = Number(params.get('season'))
-  const season: SeasonID = seasonValue === 2 || seasonValue === 3 ? seasonValue : 1
+  const target = location.hash.slice(1)
+  const targetEntry = target.startsWith('story-') ? entryByID[target.slice(6)] : undefined
+  const targetChapter = targetEntry?.chapter ?? chapters.find((chapter) => chapterID(chapter) === target)?.id
+  const targetSeason = targetEntry?.season ?? chapters.find((chapter) => chapter.id === targetChapter)?.season
+  const season = seasons.find((item) => item.id === Number(params.get('season')))?.id ?? targetSeason ?? seasons[0].id
   const [filters, change] = useState(initialFilters)
   const [showFilters, setShowFilters] = useState(false)
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
-  const target = location.hash.slice(1)
   const { visible, matches } = useFiltered(filters, tracker, season, true, target)
   const nextIncomplete = entries.find((entry) => entry.season === season && !entry.childQuestIDs.length &&
     matches.has(entry.id) && !isComplete(entry, tracker.progress))
@@ -248,9 +250,10 @@ function Timeline({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry }
 
   useEffect(() => {
     if (!target) return
+    if (targetChapter) setCollapsed((current) => current.has(targetChapter) ? new Set([...current].filter((id) => id !== targetChapter)) : current)
     const timer = window.setTimeout(() => document.getElementById(target)?.scrollIntoView({ block: 'start' }), 30)
     return () => window.clearTimeout(timer)
-  }, [season, target, visible])
+  }, [season, target, targetChapter])
 
   function reset() {
     change(initialFilters)
@@ -278,8 +281,7 @@ function Timeline({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry }
         </div>
         {chapterGroups.length === 0 && <Empty reset={reset} />}
         {chapterGroups.map(({ chapter, items }) => {
-          const linked = items.some((entry) => target === entryAnchor(entry.id) || entry.childQuestIDs.some((id) => target === entryAnchor(id)))
-          const open = !collapsed.has(chapter.id) || linked
+          const open = !collapsed.has(chapter.id)
           const summary = totals(entries.filter((entry) => entry.chapter === chapter.id), tracker.progress)
           return <section className="timeline-chapter" key={chapter.id} id={chapterID(chapter)}>
             <button type="button" className="chapter-heading" aria-expanded={open} aria-controls={'entries-' + chapter.id} onClick={() => {
@@ -325,6 +327,11 @@ function Library({ tracker, mode }: { tracker: Tracker; mode?: 'agents' | 'event
 
   return <>
     <PageHeading title={mode === 'agents' ? 'Agent Stories' : mode === 'events' ? 'Events' : 'Content Library'} subtitle="Search the archive by story, Agent, or game version." />
+    <nav className="library-nav" aria-label="Library sections">
+      <NavLink end to="/library">All stories</NavLink>
+      <NavLink to="/agents">Agent Stories</NavLink>
+      <NavLink to="/events">Events</NavLink>
+    </nav>
     <section className="panel library-filters">
       <div className="library-search-row"><SearchBox q={q} setQuery={(value) => update('q', value)} /><label>Season<select aria-label="Season" value={season ?? ''} onChange={(event) => update('season', event.target.value)}><option value="">All seasons</option>{seasons.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label></div>
       <Categories filters={filters} change={change} />

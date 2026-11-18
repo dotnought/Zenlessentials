@@ -23,14 +23,15 @@ type Props = {
 }
 
 export function StoryCard({ entry, tracker, nextID, childFilter, showChildMatch, target }: Props) {
-  const [expanded, setExpanded] = useState<boolean | null>(null)
+  const [expanded, setExpanded] = useState<{ target?: string; value: boolean }>()
   const [revealed, setRevealed] = useState(false)
   const complete = isComplete(entry, tracker.progress)
   const children = entry.childQuestIDs.map((id) => entryByID[id])
   const group = children.length > 0
   const linkedChild = children.some((child) => entryAnchor(child.id) === target)
   const deepLinked = target === entryAnchor(entry.id) || linkedChild
-  const open = expanded ?? (deepLinked || Boolean(showChildMatch))
+  const open = expanded && expanded.target === target ? expanded.value : deepLinked || Boolean(showChildMatch)
+  const toggle = () => setExpanded({ target, value: !open })
   const availability = getAvailability(entry)
   const canWatch = availability === 'expired' || availability === 'archived' || availability === 'unknown'
   const watched = tracker.progress[entry.id]?.method === 'watched'
@@ -43,7 +44,7 @@ export function StoryCard({ entry, tracker, nextID, childFilter, showChildMatch,
   return <article id={entryAnchor(entry.id)} className={'story-card type-' + entry.contentType + (complete ? ' is-complete' : '') + (nextID === entry.id ? ' is-next' : '') + (entry.parentID ? ' story-child' : '')}>
     <div className="story-row">
       <div className="type-icon"><TypeIcon type={entry.contentType} /></div>
-      <button type="button" className="story-title" aria-expanded={open} aria-controls={detailID} onClick={() => setExpanded(!open)}>
+      <button type="button" className="story-title" aria-expanded={open} aria-controls={detailID} onClick={toggle}>
         <span className="story-meta">
           <span className="type-label">{categories[entry.contentType]}</span>
           {!entry.parentID && entry.releaseVersion && <span className="version-tag">v{entry.releaseVersion}</span>}
@@ -60,7 +61,7 @@ export function StoryCard({ entry, tracker, nextID, childFilter, showChildMatch,
             <input type="checkbox" checked={complete} aria-label={'Complete ' + entry.title} onChange={() => tracker.mark(entry.id, !complete && availability === 'expired' ? 'watched' : 'toggle')} />
             <span><Check size={16} strokeWidth={3} /></span>
           </label>}
-      <button type="button" className="icon-button details-toggle" aria-label={(open ? 'Collapse ' : 'Expand ') + entry.title} aria-expanded={open} aria-controls={detailID} onClick={() => setExpanded(!open)}><ChevronDown size={17} className={open ? 'rotated' : ''} /></button>
+      <button type="button" className="icon-button details-toggle" aria-label={(open ? 'Collapse ' : 'Expand ') + entry.title} aria-expanded={open} aria-controls={detailID} onClick={toggle}><ChevronDown size={17} className={open ? 'rotated' : ''} /></button>
     </div>
     {open && <div className="story-details" id={detailID}>
       <div className="detail-head">

@@ -45,6 +45,17 @@ export function serializeProgress(completions: Progress) {
   return JSON.stringify({ format: 'zenlessentials-progress', version: 1, completions }, null, 2)
 }
 
+export function mergeProgress(current: Progress, backup: Progress): Progress {
+  const result = { ...current }
+  for (const [id, imported] of Object.entries(backup)) {
+    const existing = result[id]
+    const oldTime = existing?.completedAt ? Date.parse(existing.completedAt) : -Infinity
+    const newTime = imported.completedAt ? Date.parse(imported.completedAt) : -Infinity
+    if (!existing || newTime > oldTime) result[id] = imported
+  }
+  return result
+}
+
 function readProgress(): Progress {
   try {
     const saved = localStorage.getItem(progressKey)

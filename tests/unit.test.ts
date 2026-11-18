@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import test from 'node:test'
 import { entries, entryByID } from '../src/data/timeline'
 import { getAvailability } from '../src/data/model'
-import { isComplete, parseProgress, serializeProgress, totals } from '../src/progress'
+import { isComplete, mergeProgress, parseProgress, serializeProgress, totals } from '../src/progress'
 
 test('backup round trip keeps stable IDs, methods, and entries from future data versions', () => {
   const progress = {
@@ -18,6 +18,14 @@ test('backup rejection is atomic for malformed documents and records', () => {
     '{"format":"zenlessentials-progress","version":1,"completions":{"__proto__":{"method":"played","completedAt":null}}}',
     '{"format":"zenlessentials-progress","version":1,"completions":{"demo":{"method":"watched","completedAt":"yesterday"}}}',
   ]) assert.throws(() => parseProgress(value))
+})
+
+test('backup merge preserves the newest record across valid timestamp formats', () => {
+  const newer = { method: 'played', completedAt: '2026-11-18T12:00:00.100Z' } as const
+  const older = { method: 'watched', completedAt: '2026-11-18T12:00:00Z' } as const
+  assert.deepEqual(mergeProgress({ prologue: newer }, { prologue: older, 'past-event': older }), {
+    prologue: newer, 'past-event': older,
+  })
 })
 
 test('quest chains count only individual stories and complete when each child is checked', () => {

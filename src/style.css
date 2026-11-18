@@ -68,7 +68,7 @@
 .hero-corner { position: absolute; right: 17px; bottom: 16px; display: flex; gap: 4px; opacity: .8; }
 .hero-corner i { display: block; width: 5px; height: 13px; transform: skewX(-28deg); background: #f7ed8a; }
 .hero-corner i:nth-child(-n+2) { opacity: .4; }
-.season-nav { z-index: 4; position: sticky; top: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; padding: 12px 0 15px; margin: 3px 0 0; background: var(--base); }
+.season-nav { z-index: 4; position: sticky; top: 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(100px, 1fr); gap: 9px; padding: 12px 0 15px; margin: 3px 0 0; background: var(--base); overflow-x: auto; }
 .season-tab { min-width: 0; display: flex; align-items: center; gap: 10px; padding: 10px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; transition: background .18s, border-color .18s; }
 .season-tab:hover { border-color: #666650; background: #25262a; }
 .season-tab.selected { background: #2b2a20; border-color: #777443; }
@@ -221,6 +221,9 @@ select { color: #e1e1e4; background: #202126; border: 1px solid #373940; border-
 .page-heading h1 { margin: 0 0 4px; font: italic 800 clamp(42px, 6vw, 73px)/.9 var(--title-font); text-transform: uppercase; color: var(--yellow); }
 .page-heading p { margin: 10px 0 0; color: var(--muted); font-size: 14px; }
 .library-search-row { margin-bottom: 11px; }
+.library-nav { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 9px; }
+.library-nav a { padding: 8px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-weight: 700; color: var(--muted); }
+.library-nav a:hover, .library-nav a.active { color: var(--yellow); background: #2c2b21; border-color: #5b5736; }
 .result-heading { display: flex; align-items: center; gap: 8px; color: var(--muted); margin: 17px 0 10px; font-size: 12px; }
 .library-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; align-items: start; }
 .empty { min-height: 175px; padding: 18px; text-align: center; display: grid; place-items: center; align-content: center; gap: 6px; }

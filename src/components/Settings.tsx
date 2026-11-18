@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { Download, EyeOff, HardDrive, RotateCcw, Upload } from 'lucide-react'
-import { parseProgress, serializeProgress } from '../progress'
+import { mergeProgress, parseProgress, serializeProgress } from '../progress'
 import type { Preferences, Tracker } from '../progress'
 
 const switches: { key: keyof Preferences; title: string; note: string }[] = [
@@ -20,13 +20,7 @@ export function Settings({ tracker, compact = false }: { tracker: Tracker; compa
     try {
       if (file.size > 2_000_000) throw new Error('This backup exceeds the 2 MB size limit.')
       const parsed = parseProgress(await file.text())
-      tracker.setProgress((current) => {
-        const result = { ...current }
-        for (const [id, imported] of Object.entries(parsed)) {
-          if (!result[id] || (imported.completedAt ?? '') > (result[id].completedAt ?? '')) result[id] = imported
-        }
-        return result
-      })
+      tracker.setProgress((current) => mergeProgress(current, parsed))
       setMessage('Backup merged with your progress.')
     } catch (error) {
       setMessage(error instanceof SyntaxError ? 'This file is not valid JSON.' : error instanceof Error ? error.message : 'Import failed.')

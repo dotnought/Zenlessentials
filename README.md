@@ -47,7 +47,7 @@ The browser tests use the production build through Vite preview and exercise des
 
 ## GitHub and Netlify
 
-The production repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials), with `main` as the deployment branch. To deploy a separate copy, create or select an empty GitHub repository and push your checkout’s `main` branch to it.
+The production repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials), with `main` as the deployment branch. The production site is [zenlessentials.netlify.app](https://zenlessentials.netlify.app/). To deploy a separate copy, create or select an empty GitHub repository and push your checkout’s `main` branch to it.
 
 ```sh
 git remote -v
@@ -61,8 +61,8 @@ Use branches and pull requests for routine changes. Keep the lockfile and `netli
 3. Complete the one-time GitHub authorization. If GitHub asks which repositories Netlify may access, select `dotnought/Zenlessentials`.
 4. Select the repository and verify the production branch is `main`.
 5. Leave the base directory at the repository root. Verify that the build command is `npm run build` and the publish directory is `dist`. The repository’s configuration supplies both settings and uses Node.js 22.
-6. Select **Deploy** and wait for the published deploy. Open the public `netlify.app` address from the project overview.
-7. Verify the home page, refresh `/timeline`, `/agents`, `/events`, and `/stats` directly, and confirm a checked item persists after a reload.
+6. Select **Deploy** and wait for the published deploy. Set **Project configuration → General → Visitor access → Project visibility** to **Public** to make production accessible without a Netlify account.
+7. Open the production address from the project overview. Refresh `/timeline`, `/agents`, `/events`, and `/stats` directly, and confirm a checked item persists after a reload.
 
 Pushing or merging to `main` triggers a production deploy once the GitHub connection is active. Netlify can build Deploy Previews from pull requests with the same configuration. Each deploy preview has its own origin and local progress.
 
@@ -71,7 +71,7 @@ Pushing or merging to `main` triggers a production deploy once the GitHub connec
 1. Read the latest official update and event notices and compare them with the Video Archive or an English quest transcript.
 2. Identify the present-day framing, first meetings, earlier references, and any official best-experience prerequisite.
 3. Edit `src/data/story-data.ts`, `src/data/event-data.ts`, and any new sections in `src/data/chapters.ts`. Add sources in `src/data/sources.ts` as needed.
-4. Keep published IDs stable. Assign new IDs to new stories and commissions. Leave unverified prerequisites, dates, or replay status unknown. Leave room between explicit orders for later additions.
+4. Keep published IDs stable. Assign new IDs to new stories and commissions. Preserve existing completion semantics if you split a published entry into a quest chain. Leave unverified prerequisites, dates, or replay status unknown. Leave room between explicit orders for later additions.
 5. Update [CHRONOLOGY.md](CHRONOLOGY.md) with the new coverage and important placement decisions.
 6. Run the checks, build, and browser tests. Commit to a branch, review the preview when available, and merge to `main`.
 

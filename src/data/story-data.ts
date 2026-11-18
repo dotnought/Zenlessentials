@@ -8,7 +8,8 @@ const mainRows: MainRow[] = [
   ['prologue', 'Business x Strangeness x Justness', 's1-prologue', '1.0', 10, 1, 'A rescue job brings the Cunning Hares to Phaethon, a pair of sibling Proxies operating from the Random Play video store.', ['Belle', 'Wise', 'Nicole', 'Anby', 'Billy'], 'Begin a new game.'],
   ['cat-a', "Cat's Lost & Found (A)", 's1-cat', '1.0', 10, 2, 'Nekomata approaches the Cunning Hares with a commission tied to the old city district.', ['Nekomata', 'Nicole', 'Anby', 'Billy']],
   ['cat-b', "Cat's Lost & Found (B)", 's1-cat', '1.0', 20, 3, 'Phaethon and the Cunning Hares follow Nekomata back into the Hollow.', ['Nekomata', 'Nicole', 'Anby', 'Billy']],
-  ['the-zero-zone', 'The Zero Zone', 's1-zero', '1.0', 10, 4, 'Phaethon begins working with the investigators at Scott Outpost.', ['Belle', 'Wise', 'Ray', 'Roland']],
+  ['the-zero-zone', 'The Zero Zone', 's1-zero', '1.0', 10, 4, 'Phaethon begins working with the investigators at Scott Outpost.', ['Belle', 'Wise', 'Ray', 'Roland'],
+    'As of 2.5, reach Inter-Knot Lv. 25 and Certified Proxy, then complete this key Side Mission to unlock Hollow Zero.', [updates['2.5']]],
   ['hollow-heart-a', "A Call From the Hollow's Heart (A)", 's1-hollow-heart', '1.0', 10, 6, 'Belobog Heavy Industries needs a Proxy to help track down missing construction machinery.', ['Koleda', 'Grace', 'Ben', 'Anton']],
   ['hollow-heart-b', "A Call From the Hollow's Heart (B)", 's1-hollow-heart', '1.0', 20, 7, 'The Belobog investigation draws the team deeper into the construction site.', ['Koleda', 'Grace', 'Ben', 'Anton']],
   ['unthinkable-a', 'Mission Unthinkable (A)', 's1-unthinkable', '1.0', 10, 8, 'A new lead puts Phaethon in the orbit of New Eridu Public Security.', ['Zhu Yuan', 'Qingyi', 'Belle', 'Wise']],
@@ -39,7 +40,8 @@ const mainRows: MainRow[] = [
 export const mainStories: EntryInput[] = mainRows.map(([id, title, chapter, version, order, archiveID, summary, characters, unlock, extra], index) => ({
   id, title, chapter, releaseVersion: version, chronologicalOrder: order, characters, description: summary,
   contentType: 'main',
-  optional: false,
+  optional: id === 'the-zero-zone',
+  notes: id === 'the-zero-zone' ? 'The Video Archive preserves its original Chapter 1 intermission position. Version 2.5 moved the playable mission to Key Side Missions.' : undefined,
   availability: 'permanent',
   placementAfter: id === 'falling-stars-a' ? ['inferno-b', 'virtual-revenge']
     : id === 'bury-tears-a' ? ['falling-stars-b', 'astra-nomical-moment']
@@ -85,7 +87,7 @@ type AgentRow = [id: string, title: string, agent: string, chapter: string, vers
 const roman = ['I', 'II', 'III']
 const agentRows: AgentRow[] = [
   ['mole-in-the-hole', 'Mole in the Hole', 'Soldier 11', 's1-zero', '1.0', 35, 10001, 'cat-b',
-    "Complete Cat's Lost & Found.", 'A military client hires a Proxy for an undercover assignment.', 'The frame is an early meeting with Soldier 11. It fits the first Scott Outpost stretch and introduces her ahead of later Obol Squad stories.'],
+    'As of 2.5, complete the Chapter 1 main story intermission.', 'A military client hires a Proxy for an undercover assignment.', 'The frame is an early meeting with Soldier 11. It fits the first Scott Outpost stretch and introduces her ahead of later Obol Squad stories.'],
   ['cat-mouse', 'Cat and Mouse Game', 'Nekomata · Nekomiya Mana', 's1-hollow-heart', '1.0', 50, 10002, 'hollow-heart-b',
     "Complete A Call From the Hollow's Heart.", 'Nekomata takes on a job that reconnects her with her old neighborhood.', 'Nekomata already knows Phaethon and the Hares. The Chapter 2 break also respects the contemporary Video Archive unlock.'],
   ['iron-witch', 'The Iron Witch', 'Grace Howard', 's1-unthinkable', '1.0', 33, 10004, 'unthinkable-b',
@@ -127,7 +129,8 @@ export const agentStories: EntryInput[] = [
     const base: EntryInput = {
       id, title, chapter, releaseVersion, chronologicalOrder, description, placementReason, prerequisites,
       contentType: 'agent', availability: 'permanent', placementAfter: [after], childQuestIDs: ids,
-      characters: agent.split(' · '), sourceURLs: [archive(archiveID), wiki('Agent Story and episodes', title), updates[releaseVersion] ?? versionWiki(releaseVersion)],
+      characters: agent.split(' · '), sourceURLs: [archive(archiveID), wiki('Agent Story and episodes', title), updates[releaseVersion] ?? versionWiki(releaseVersion),
+        ...(id === 'mole-in-the-hole' ? [updates['2.5']] : [])],
       relatedEntryIDs: id === 'out-of-sight' ? ['echoes-silver'] : id === 'echoes-silver' ? ['out-of-sight'] : [],
       notes: id === 'out-of-sight' ? 'This Agent Story has one episode with three HDD commissions: Blind Pursuit, Invitation to Kill, and Piercing Rain.' : undefined,
     }
