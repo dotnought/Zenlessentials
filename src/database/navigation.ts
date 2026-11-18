@@ -13,6 +13,10 @@ export const databaseSections = [
 export const databaseSearch = { key: 'search', title: 'Database Search', icon: ScanSearch }
 export const dbPath = (section = '', id = '') => '/database' + (section ? '/' + section : '') + (id ? '/' + id : '')
 
+export function agentCatalogLink(state: { catalogSearch?: unknown } | null) {
+  return { pathname: dbPath('agents'), search: typeof state?.catalogSearch === 'string' ? state.catalogSearch : '' }
+}
+
 export function databaseTitle(pathname: string) {
   const section = pathname.split('/')[2]
   return [...databaseSections, databaseSearch].find((item) => item.key === section)?.title ?? 'Overview'

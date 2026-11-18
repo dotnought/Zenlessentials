@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { ArrowUpRight, BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { entryByID } from '../data/timeline'
 import { categories } from '../data/model'
 import { storyLink } from '../components/StoryCard'
 import { agentByID, banners, catalog, discByID, engineByID, engines, loadKit, observations, statByID, storyIdsByAgent } from './data'
 import { buildByAgent, recommendedTeams } from './editorial'
 import { agentStat, maxCoreSteps, promotionCaps, showStat } from './mechanics'
-import { dbPath } from './navigation'
+import { agentCatalogLink, dbPath } from './navigation'
 import type { Agent, AgentKit, Skill } from './model'
 import type { CollectionState } from './collection'
 import { AgentLink, DBPanel, Empty, Materials, OpenSquad, Ownership, RankBadge, RecordLink, RelativeDate, Sources, SquadLinks, Tags, Thumbnail } from './ui'
@@ -16,6 +16,7 @@ const tabs = [['Overview','overview'],['Skills','skills'],['Builds','builds'],['
 
 export function AgentPage({ id, state }: { id: string; state: CollectionState }) {
   const agent = agentByID.get(id)
+  const { state: navigation } = useLocation()
   const [tab, setTab] = useState<(typeof tabs)[number][1]>('overview')
   const [kit, setKit] = useState<AgentKit>()
   const [kitError, setKitError] = useState(false)
@@ -33,7 +34,7 @@ export function AgentPage({ id, state }: { id: string; state: CollectionState })
   return <>
     <section className="db-profile-hero" style={{ '--entry-accent': agent.color ?? 'var(--accent)' } as React.CSSProperties}>
       <div className="db-profile-copy">
-        <div className="db-kicker"><Link to={dbPath('agents')}>Agents</Link><ChevronRight size={14} />{agent.version ? 'VERSION ' + agent.version : 'RELEASED'}</div>
+        <div className="db-kicker"><Link to={agentCatalogLink(navigation)}>Agents</Link><ChevronRight size={14} />{agent.version ? 'VERSION ' + agent.version : 'RELEASED'}</div>
         <div className="db-identity"><RankBadge rank={agent.rank} /><h1>{agent.name}</h1></div>
         {agent.aliases.length > 0 && <p className="db-alias">{agent.aliases[0]}</p>}
         <Tags items={[agent.attribute, agent.specialty, agent.faction, agent.attackTypes.join(" / ")]} />

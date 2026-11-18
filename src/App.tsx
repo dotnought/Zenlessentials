@@ -34,7 +34,13 @@ const navItems = [
   { path: '/database', label: 'Database', icon: Database },
   { path: '/profile', label: 'Profile', icon: UserRound },
 ]
-const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/profile': 'Profile', '/profile/collection': 'Profile', '/profile/account': 'Profile', '/settings': 'Settings' }
+const views: Record<string, string> = { '/': 'Dashboard', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/profile': 'Profile', '/profile/collection': 'Profile', '/profile/account': 'Profile', '/settings': 'Settings' }
+const pageArtwork = {
+  dashboard: ['/database-art/agent-1091.webp', '/database-art/agent-1371.webp'],
+  library: ['/database-art/agent-1031.webp', '/database-art/agent-1021.webp'],
+  profile: ['/database-art/agent-1191.webp', '/database-art/boo-54004.webp'],
+  settings: ['/database-art/agent-1181.webp', '/database-art/boo-54002.webp'],
+} as const
 const databaseShortcuts = databaseSections.filter(({ key }) => ['agents', 'engines', 'tiers', 'teams', 'banners'].includes(key))
 const versions = [...new Set(entries.flatMap((entry) => entry.releaseVersion ? [entry.releaseVersion] : []))]
   .sort((first, second) => first.localeCompare(second, undefined, { numeric: true })).reverse()
@@ -58,7 +64,7 @@ function recommend(tracker: Tracker) {
 }
 
 function Brand() {
-  return <Link to="/" className="brand" aria-label="Zenlessentials home">
+  return <Link to="/dashboard" className="brand" aria-label="Zenlessentials home">
     <svg className="brand-mark" viewBox="0 0 48 48" width="37" height="37" aria-hidden="true">
       <rect x="2" y="2" width="44" height="44" rx="12" />
       <path d="M15 13h22l-2 4-15 14h12l-2 4H10l2-5 15-13H13z" />
@@ -85,7 +91,7 @@ function Shell({ children }: { children: React.ReactNode }) {
     <aside className="sidebar">
       <Brand />
       <nav className="main-nav" aria-label="Main navigation">
-        {navItems.map(({ path, label, icon: Icon }) => <NavLink key={path} to={path} className={({ isActive }) => isActive || (path === '/timeline' && pathname === '/') || (path === '/library' && ['/agents', '/events'].includes(pathname)) ? 'nav-link active' : 'nav-link'} aria-current={(path === '/timeline' && pathname === '/') ? 'page' : undefined}>
+        {navItems.map(({ path, label, icon: Icon }) => <NavLink key={path} to={path} className={({ isActive }) => isActive || (path === '/library' && ['/agents', '/events'].includes(pathname)) ? 'nav-link active' : 'nav-link'}>
           <Icon size={18} /><span>{label}</span>
         </NavLink>)}
         <NavLink to="/settings" className={({ isActive }) => 'nav-link settings-nav' + (isActive ? ' active' : '')}><Settings2 size={18} /><span>Settings</span></NavLink>
@@ -325,8 +331,15 @@ function Timeline({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry }
   </>
 }
 
-function PageHeading({ title, subtitle }: { title: string; subtitle: string }) {
-  return <div className="page-heading"><h1>{title}</h1><p>{subtitle}</p></div>
+function PageHeading({ title, subtitle, section }: { title: string; subtitle: string; section: keyof typeof pageArtwork }) {
+  const [primary, secondary] = pageArtwork[section]
+  return <header className="page-heading" data-banner={section}>
+    <div className="page-heading-art" aria-hidden="true">
+      <img src={primary} alt="" decoding="async" />
+      <img src={secondary} alt="" decoding="async" loading="lazy" />
+    </div>
+    <div className="page-heading-copy"><h1>{title}</h1><p>{subtitle}</p></div>
+  </header>
 }
 
 function Library({ tracker, mode }: { tracker: Tracker; mode?: 'agents' | 'events' }) {
@@ -345,7 +358,7 @@ function Library({ tracker, mode }: { tracker: Tracker; mode?: 'agents' | 'event
   }
 
   return <>
-    <PageHeading title={mode === 'agents' ? 'Agent Stories' : mode === 'events' ? 'Events' : 'Content Library'} subtitle="Search the archive by story, Agent, or game version." />
+    <PageHeading section="library" title={mode === 'agents' ? 'Agent Stories' : mode === 'events' ? 'Events' : 'Content Library'} subtitle="Search the archive by story, Agent, or game version." />
     <nav className="library-nav" aria-label="Library sections">
       <NavLink end to="/library">All stories</NavLink>
       <NavLink to="/agents">Agent Stories</NavLink>
@@ -376,7 +389,7 @@ function Profile({ tracker, collection, accountLabel }: { tracker: Tracker; coll
   const owned = Object.keys(collection.agents).length
   const squads = collection.teams.length
   return <>
-    <PageHeading title="Profile" subtitle="Your story progress, collection, and saved squads." />
+    <PageHeading section="profile" title="Profile" subtitle="Your story progress, collection, and saved squads." />
     <nav className="profile-nav" aria-label="Profile sections">
       <NavLink to="/profile" end className="panel profile-tab">
         <BookOpen size={22} aria-hidden="true" /><span><strong>Story Progress</strong><small>{done}/{total} completed</small></span><ChevronRight size={16} aria-hidden="true" />
@@ -421,8 +434,8 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
     .slice(0, 5)
   const currentChapter = next && chapters.find((chapter) => chapter.id === next.chapter)
   return <>
-    <PageHeading title="Dashboard" subtitle="Pick up the story, look up an Agent, or build your next squad." />
-    <div className="dashboard-grid">
+    <PageHeading section="dashboard" title="Dashboard" subtitle="Pick up the story, look up an Agent, or build your next squad." />
+    <div className="dashboard-grid dashboard-panels">
       <UpNext next={next} tracker={tracker} />
       <section className="panel chart-panel" aria-labelledby="dashboard-database-title">
         <div className="dashboard-database-heading">
@@ -434,8 +447,6 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
           <Link to="/profile/collection"><Layers3 size={17} aria-hidden="true" />My Collection</Link>
         </div>
       </section>
-    </div>
-    <div className="dashboard-grid">
       <Overview tracker={tracker} />
       <SeasonBreakdown tracker={tracker} />
       <section className="panel chart-panel">
@@ -472,7 +483,7 @@ export function Zenlessentials({ tracker, collection, account, accountLabel }: {
     {tracker.storageError && <p className="storage-message" role="alert">Browser storage is unavailable. Export a backup before leaving this page.</p>}
     {collection.storageError && !tracker.storageError && <p className="storage-message" role="alert">Your browser could not save your collection. <Link to="/profile/collection">Export a collection backup</Link> before leaving.</p>}
     <Routes>
-      <Route path="/" element={<Timeline tracker={tracker} next={next} />} />
+      <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/timeline" element={<Timeline tracker={tracker} next={next} />} />
       <Route path="/dashboard" element={<Dashboard tracker={tracker} next={next} />} />
       <Route path="/library" element={<Library key="all" tracker={tracker} />} />
@@ -486,7 +497,7 @@ export function Zenlessentials({ tracker, collection, account, accountLabel }: {
         {account && <Route path="account" element={account} />}
       </Route>
       <Route path="/stats" element={<Navigate to="/profile" replace />} />
-      <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
+      <Route path="/settings" element={<><PageHeading section="settings" title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />
     </Routes>
     <footer className="site-footer">

@@ -6,8 +6,8 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 
 ## Use the tracker
 
-- **Timeline** is the default view. Switch seasons, jump to a chapter or the next incomplete item, and expand cards for prerequisites, related stories, and sources.
-- **Dashboard** shows the next core story, your current chapter, recent completions, and shortcuts to the Game Database and your collection.
+- **Dashboard** is the home page. It shows the next core story, your current chapter, recent completions, and shortcuts to the Game Database and your collection.
+- **Timeline** lets you switch seasons, jump to a chapter or the next incomplete item, and expand cards for prerequisites, related stories, and sources.
 - **Content Library** searches titles, characters, categories, and summaries. It includes filters for season, game version, progress, and availability, with dedicated Agent Story and Event views.
 - **Profile → Story Progress** shows progress across the archive, by season, and by content type. Grouped stories count their individual parts. Switch to **Collection** for your roster, wishlist, and saved squads.
 - **Settings** controls spoilers, optional content, expired content, and completed items. Expired events remain trackable and are recorded as watched. Replayable archived events support both played and watched.

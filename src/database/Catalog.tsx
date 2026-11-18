@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Layers3, Search } from 'lucide-react'
+import { useMemo } from 'react'
+import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Layers3, Plus, Search } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { agents, bangboo, catalog, discs, engines, observations, statByID } from './data'
 import type { CollectionState } from './collection'
@@ -47,7 +47,7 @@ export function DatabaseHub() {
 
 export function Catalog({ kind, state }: { kind: Kind; state: CollectionState }) {
   const [params, setParams] = useSearchParams()
-  const [page, setPage] = useState(1)
+  const page = Number(params.get('page'))
   const q = params.get('q') ?? ''
   const owned = params.get('owned') ?? ''
   const sorting = params.get('sort') ?? 'name'
@@ -57,8 +57,8 @@ export function Catalog({ kind, state }: { kind: Kind; state: CollectionState })
     return [key, values]
   })), [kind])
   function filter(key: string, value: string) {
-    setPage(1)
     const next = new URLSearchParams(params)
+    next.delete('page')
     if (value) next.set(key, value)
     else next.delete(key)
     setParams(next, { replace: true })
@@ -79,7 +79,16 @@ export function Catalog({ kind, state }: { kind: Kind; state: CollectionState })
   }), [kind, owned, q, params, sorting, state.collection])
   const label = databaseSections.find((item) => item.key === kind)!
   const pages = Math.max(1, Math.ceil(results.length / pageSize))
-  const current = Math.min(page, pages)
+  const current = Number.isSafeInteger(page) && page > 0 ? Math.min(page, pages) : 1
+  const catalogSearch = params.toString()
+
+  function goToPage(destination: number) {
+    const next = new URLSearchParams(params)
+    if (destination === 1) next.delete('page')
+    else next.set('page', String(destination))
+    setParams(next)
+  }
+
   return <>
     <DBHeading title={label.title} description={label.description}>
       {kind === 'engines' && <Link className="secondary-button" to={dbPath('engines','compare')}>Compare W-Engines <ArrowRight size={15} /></Link>}
@@ -103,36 +112,48 @@ export function Catalog({ kind, state }: { kind: Kind; state: CollectionState })
       </div>
       <div className="db-results">
         <span role="status">{results.length} of {entries[kind].length} {label.title}</span>
-        {params.size > 0 && <button className="secondary-button" type="button" onClick={() => { setPage(1); setParams({}, { replace: true }) }}>Clear filters</button>}
+        {params.size > Number(params.has('page')) && <button className="secondary-button" type="button" onClick={() => setParams({}, { replace: true })}>Clear filters</button>}
       </div>
     </div>
     {results.length ? <div className={'db-cards db-cards-' + kind}>
-      {results.slice((current - 1) * pageSize, current * pageSize).map((entry) => <CatalogCard entry={entry} key={entry.id} kind={kind} owned={kind !== 'discs' && Object.hasOwn(state.collection[kind], entry.id)} />)}
+      {results.slice((current - 1) * pageSize, current * pageSize).map((entry) => {
+        const owned = kind !== 'discs' && Object.hasOwn(state.collection[kind], entry.id)
+        return <CatalogCard entry={entry} key={entry.id} kind={kind} owned={owned} catalogSearch={catalogSearch}
+          onToggleOwned={kind === 'agents' ? () => state.setOwned('agents', entry.id, owned ? undefined : 0) : undefined} />
+      })}
     </div> : <Empty>No matches. Try clearing a filter or searching by name.</Empty>}
     {pages > 1 && <nav className="db-pager" aria-label="Catalog pages">
-      <button className="secondary-button" type="button" disabled={current === 1} onClick={() => setPage(current - 1)}><ChevronLeft size={16} /> Previous</button>
+      <button className="secondary-button" type="button" disabled={current === 1} onClick={() => goToPage(current - 1)}><ChevronLeft size={16} /> Previous</button>
       <span>Page {current} of {pages}</span>
-      <button className="secondary-button" type="button" disabled={current === pages} onClick={() => setPage(current + 1)}>Next <ChevronRight size={16} /></button>
+      <button className="secondary-button" type="button" disabled={current === pages} onClick={() => goToPage(current + 1)}>Next <ChevronRight size={16} /></button>
     </nav>}
   </>
 }
 
-export function CatalogCard({ entry, kind, owned }: { entry: RecordItem; kind: Kind; owned?: boolean }) {
+function CatalogCard({ entry, kind, owned, catalogSearch, onToggleOwned }: {
+  entry: RecordItem; kind: Kind; owned: boolean; catalogSearch: string; onToggleOwned?: () => void
+}) {
   const accent = 'color' in entry ? entry.color : undefined
-  return <Link className="db-card panel" to={dbPath(kind, entry.id)} style={accent ? { '--entry-accent': accent } as React.CSSProperties : undefined}>
-    <div className="db-card-art">
-      <Thumbnail asset={entry} portrait={kind === 'agents'} />
-      {'rank' in entry && <RankBadge rank={entry.rank} />}
-      {owned && <span className="db-owned-badge" aria-label="Owned"><Check size={14} /></span>}
-    </div>
-    <div className="db-card-body">
-      <strong>{entry.name}</strong>
-      {'attribute' in entry && <><Tags items={[entry.attribute, entry.specialty]} /><small>{entry.faction}</small>{entry.signatureId && <small>Signature W-Engine</small>}</>}
-      {'secondary' in entry && <><Tags items={[entry.specialty, statByID.get(entry.secondary.stat)?.name]} /><small>{entry.base} Base ATK{entry.signatureIds.length ? ' · Signature' : ''}</small></>}
-      {'two' in entry && <small>{entry.two}</small>}
-      {'skills' in entry && <small>{entry.skills[0]?.name}</small>}
-    </div>
-  </Link>
+  return <article className="db-card panel" style={accent ? { '--entry-accent': accent } as React.CSSProperties : undefined}>
+    <Link className="db-card-link" to={dbPath(kind, entry.id)} state={kind === 'agents' ? { catalogSearch } : undefined}>
+      <div className="db-card-art">
+        <Thumbnail asset={entry} portrait={kind === 'agents'} />
+        {'rank' in entry && <RankBadge rank={entry.rank} />}
+        {owned && !onToggleOwned && <span className="db-owned-badge" aria-label="Owned"><Check size={14} /></span>}
+      </div>
+      <div className="db-card-body">
+        <strong>{entry.name}</strong>
+        {'attribute' in entry && <><Tags items={[entry.attribute, entry.specialty]} /><small>{entry.faction}</small>{entry.signatureId && <small>Signature W-Engine</small>}</>}
+        {'secondary' in entry && <><Tags items={[entry.specialty, statByID.get(entry.secondary.stat)?.name]} /><small>{entry.base} Base ATK{entry.signatureIds.length ? ' · Signature' : ''}</small></>}
+        {'two' in entry && <small>{entry.two}</small>}
+        {'skills' in entry && <small>{entry.skills[0]?.name}</small>}
+      </div>
+    </Link>
+    {onToggleOwned && <button className="db-owned-toggle" type="button" aria-label={entry.name + ' ownership'} aria-pressed={owned}
+      title={owned ? 'Remove from owned Agents' : 'Mark as owned'} onClick={onToggleOwned}>
+      <span>{owned ? <Check size={15} aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}</span>
+    </button>}
+  </article>
 }
 
 export function DatabaseSearch() {

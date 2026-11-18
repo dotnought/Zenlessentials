@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { readFile } from 'node:fs/promises'
 
 test('story completion survives reload and advances the recommendation', async ({ page }) => {
-  await page.goto('/')
+  await page.goto('/timeline')
   const title = 'Business x Strangeness x Justness'
   const prologue = page.getByRole('checkbox', { name: 'Complete ' + title, exact: true })
   await expect(page.getByRole('heading', { name: title, exact: true })).toBeVisible()
@@ -13,6 +13,37 @@ test('story completion survives reload and advances the recommendation', async (
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Recently completed' })).toBeVisible()
   await expect(page.getByRole('link', { name: title })).toBeVisible()
+})
+
+test('opens Dashboard as home and shows artwork on the main sections', async ({ page }) => {
+  await page.goto('/')
+  await expect(page).toHaveURL('/dashboard')
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  const dashboardNav = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Dashboard' })
+  await expect(dashboardNav).toHaveAttribute('aria-current', 'page')
+  for (const [route, name] of [['dashboard', 'Dashboard'], ['library', 'Content Library'], ['profile', 'Profile'], ['settings', 'Settings']]) {
+    await page.goto('/' + route)
+    const banner = page.locator('[data-banner="' + route + '"]')
+    await expect(banner.getByRole('heading', { name, level: 1 })).toBeVisible()
+    await expect(banner.locator('img').first()).not.toHaveJSProperty('naturalWidth', 0)
+  }
+  const logo = page.locator('.brand')
+  await expect(logo).toHaveAttribute('href', '/dashboard')
+  if (await logo.isVisible()) await logo.click()
+  else await dashboardNav.click()
+  await expect(page).toHaveURL('/dashboard')
+})
+
+test('uses the available space on a 3440 × 1440 display', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'This checks the desktop ultrawide layout.')
+  await page.setViewportSize({ width: 3440, height: 1440 })
+  await page.goto('/dashboard')
+  await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
+  const banner = await page.locator('[data-banner="dashboard"]').boundingBox()
+  expect(banner?.width).toBeGreaterThan(2800)
+  const columns = await page.locator('.dashboard-panels').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' '))
+  expect(columns).toHaveLength(3)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(3440)
 })
 
 test('spoiler controls hide unfinished story details and reveal them on request', async ({ page }) => {

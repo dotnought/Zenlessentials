@@ -123,6 +123,41 @@ test('links the Dashboard, database and both Profile sections', async ({ page })
   await expect(page).toHaveURL('/database/agents')
 })
 
+test('keeps the Agents catalog page and filters and toggles ownership in place', async ({ page }) => {
+  await page.goto('/database/agents')
+  await page.getByRole('combobox', { name: 'Sort' }).selectOption('recent')
+  const pager = page.getByRole('navigation', { name: 'Catalog pages' })
+  await pager.getByRole('button', { name: 'Next' }).click()
+  const catalogUrl = '/database/agents?sort=recent&page=2'
+  await expect(page).toHaveURL(catalogUrl)
+  await expect(pager).toContainText('Page 2 of 3')
+  const card = page.locator('.db-cards-agents .db-card').first()
+  const profile = card.getByRole('link')
+  const ownership = card.getByRole('button', { name: /ownership/ })
+  await expect(ownership).toHaveAttribute('aria-pressed', 'false')
+  await ownership.click()
+  await expect(ownership).toHaveAttribute('aria-pressed', 'true')
+  await expect(page).toHaveURL(catalogUrl)
+  await profile.click()
+  await expect(page.getByRole('combobox', { name: 'Mindscape', exact: true })).toHaveValue('0')
+
+  await page.goBack()
+  await expect(page).toHaveURL(catalogUrl)
+  await expect(ownership).toHaveAttribute('aria-pressed', 'true')
+  await profile.click()
+  await page.locator('.db-profile-copy').getByRole('link', { name: 'Agents', exact: true }).click()
+  await expect(page).toHaveURL(catalogUrl)
+  await profile.click()
+  await page.getByRole('navigation', { name: 'Database sections' }).getByRole('link', { name: 'Agents', exact: true }).click()
+  await expect(page).toHaveURL(catalogUrl)
+  await page.reload()
+  await expect(ownership).toHaveAttribute('aria-pressed', 'true')
+  await ownership.click()
+  await expect(ownership).toHaveAttribute('aria-pressed', 'false')
+  await page.getByRole('combobox', { name: 'Sort' }).selectOption('name')
+  await expect(pager).toContainText('Page 1 of 3')
+})
+
 test('every primary database route works on direct navigation and stays inside the viewport', async ({ page }) => {
   const pages = [
     ['database','GAME DATABASE'],['database/bangboo','Bangboo'],['database/bangboo/boo-54023','Ariel'],

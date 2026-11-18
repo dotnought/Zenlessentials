@@ -1,16 +1,18 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowRight, ArrowUpRight, Bookmark, Check, ChevronRight, Database, ImageOff, Search, Star } from 'lucide-react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useLocation } from 'react-router-dom'
 import { agentByID, bangbooByID, catalog, materialByID } from './data'
 import type { CollectionState } from './collection'
 import type { Agent, Asset, MaterialCost, Rank } from './model'
-import { databaseSections, dbPath } from './navigation'
+import { agentCatalogLink, databaseSections, dbPath } from './navigation'
 
 export function DatabaseNav() {
+  const { pathname, state } = useLocation()
+  const inAgentProfile = pathname.startsWith(dbPath('agents') + '/')
   return <nav className="db-nav" aria-label="Database sections">
     <NavLink to={dbPath()} end><Database size={16} /> Overview</NavLink>
-    {databaseSections.map(({ key, title, icon: Icon }) => <NavLink key={key} to={dbPath(key)}><Icon size={15} />{title}</NavLink>)}
+    {databaseSections.map(({ key, title, icon: Icon }) => <NavLink key={key} to={key === 'agents' && inAgentProfile ? agentCatalogLink(state) : dbPath(key)}><Icon size={15} />{title}</NavLink>)}
   </nav>
 }
 
