@@ -1,11 +1,11 @@
 import { useState } from 'react'
-import { ArrowUpRight, Search } from 'lucide-react'
+import { Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { agents, observations } from './data'
 import type { CollectionState } from './collection'
 import { matchesQuery } from './mechanics'
 import { dbPath } from './navigation'
-import { DBHeading, DBPanel, Empty, Thumbnail } from './ui'
+import { DBHeading, Empty, Thumbnail } from './ui'
 import { tierByAgent, tierOrder } from './tiers'
 import type { Tier } from './tiers'
 
@@ -37,10 +37,6 @@ export function TierList({ state }: { state: CollectionState }) {
         </select></label>
       </div>
     </div>
-    {mode !== 'personal' && <DBPanel title="Rankings and usage">
-      <p>These placements apply in both modes. The percentages show sampled appearances for the selected mode in cycle {observations.cycle}.</p>
-      <a href={observations.source} className="secondary-button" target="_blank" rel="noreferrer">LvlUrArti sample <ArrowUpRight size={14} /></a>
-    </DBPanel>}
     {!selected.length && <Empty>No Agents match these filters.</Empty>}
     {tiers.map((tier) => {
       const members = selected.filter((agent) => rank(agent.id) === tier).sort((a, b) => a.name.localeCompare(b.name))
@@ -50,7 +46,7 @@ export function TierList({ state }: { state: CollectionState }) {
         <div>{members.map((agent) => <article className="db-tier-agent" key={agent.id}>
           <Link to={dbPath('agents',agent.id)}>
             <Thumbnail asset={agent} portrait /><strong>{agent.name}</strong>
-            <small>{mode !== 'personal' && observations.agents[agent.id] ? observations.agents[agent.id][mode] + '%' : agent.specialty}</small>
+            <small>{mode !== 'personal' && observations.agents[agent.id] ? observations.agents[agent.id][mode] + '% usage' : agent.specialty}</small>
           </Link>
           {mode === 'personal' && <select aria-label={'Tier for ' + agent.name} value={state.collection.tiers[agent.id] ?? ''} onChange={(event) => {
             const tier = event.target.value as Tier | ''
