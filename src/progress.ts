@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import type { NarrativeEntry } from './data/model'
 import { defaultTheme, isTheme } from './themes'
 import type { Theme } from './themes'
@@ -59,7 +60,7 @@ export function mergeProgress(current: Progress, backup: Progress): Progress {
   return result
 }
 
-function readProgress(): Progress {
+export function readProgress(): Progress {
   try {
     const saved = localStorage.getItem(progressKey)
     return saved ? parseProgress(saved) : {}
@@ -68,18 +69,21 @@ function readProgress(): Progress {
   }
 }
 
-function readPreferences(): Preferences {
-  try {
-    const saved: unknown = JSON.parse(localStorage.getItem(preferenceKey) ?? '{}')
-    if (record(saved)) {
-      const preferences = { ...defaults }
-      if (isTheme(saved.theme)) preferences.theme = saved.theme
-      for (const key of Object.keys(defaults) as (keyof Preferences)[]) {
-        const value = saved[key]
-        if (key !== 'theme' && typeof value === 'boolean') preferences[key] = value
-      }
-      return preferences
+export function parsePreferences(saved: unknown): Preferences {
+  const preferences = { ...defaults }
+  if (record(saved)) {
+    if (isTheme(saved.theme)) preferences.theme = saved.theme
+    for (const key of Object.keys(defaults) as (keyof Preferences)[]) {
+      const value = saved[key]
+      if (key !== 'theme' && typeof value === 'boolean') preferences[key] = value
     }
+  }
+  return preferences
+}
+
+export function readPreferences(): Preferences {
+  try {
+    return parsePreferences(JSON.parse(localStorage.getItem(preferenceKey) ?? '{}'))
   } catch {
     // Storage might be unavailable in private or restricted contexts.
   }
@@ -119,8 +123,15 @@ export function useTracker() {
     return () => window.removeEventListener('storage', synchronize)
   }, [])
 
+  return trackerActions({ progress, setProgress, preferences, setPreferences, storageError: progressStorageError || preferenceStorageError })
+}
+
+export function trackerActions(state: {
+  progress: Progress; setProgress: Dispatch<SetStateAction<Progress>>
+  preferences: Preferences; setPreferences: Dispatch<SetStateAction<Preferences>>; storageError: boolean
+}) {
   function mark(id: string, method: Completion['method'] | 'toggle') {
-    setProgress((current) => {
+    state.setProgress((current) => {
       if (method === 'toggle' && Object.hasOwn(current, id)) {
         const next = { ...current }
         delete next[id]
@@ -130,7 +141,7 @@ export function useTracker() {
     })
   }
 
-  return { progress, mark, setProgress, preferences, setPreferences, storageError: progressStorageError || preferenceStorageError }
+  return { ...state, mark }
 }
 
 export type Tracker = ReturnType<typeof useTracker>

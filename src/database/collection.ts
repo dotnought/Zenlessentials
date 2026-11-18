@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import type { Agent, Bangboo, Condition } from './model'
 import { tierOrder } from './tiers'
 import type { Tier } from './tiers'
@@ -53,7 +54,7 @@ export function parseCollection(raw: string): Collection {
 export const serializeCollection = (collection: Collection) =>
   JSON.stringify({ format: 'zenlessentials-collection', version: 1, collection }, null, 2)
 
-function loadCollection() {
+export function loadCollection() {
   try {
     const raw = localStorage.getItem(collectionKey)
     return raw ? parseCollection(raw) : emptyCollection
@@ -82,8 +83,12 @@ export function useCollection() {
     return () => window.removeEventListener('storage', sync)
   }, [])
 
+  return collectionActions({ collection, setCollection, storageError })
+}
+
+export function collectionActions(state: { collection: Collection; setCollection: Dispatch<SetStateAction<Collection>>; storageError: boolean }) {
   function setOwned(kind: 'agents' | 'engines' | 'bangboo', id: string, level?: number) {
-    setCollection((current) => {
+    state.setCollection((current) => {
       const updated = { ...current[kind] }
       if (level === undefined) delete updated[id]
       else updated[id] = level
@@ -91,11 +96,11 @@ export function useCollection() {
     })
   }
   function toggleList(key: 'favorites' | 'planned', id: string) {
-    setCollection((current) => ({
+    state.setCollection((current) => ({
       ...current, [key]: current[key].includes(id) ? current[key].filter((item) => item !== id) : [...current[key], id],
     }))
   }
-  return { collection, setCollection, storageError, setOwned, toggleList }
+  return { ...state, setOwned, toggleList }
 }
 export type CollectionState = ReturnType<typeof useCollection>
 

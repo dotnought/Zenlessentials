@@ -1,0 +1,17 @@
+.account-loading { padding: 24px; color: var(--muted); }
+.account-panels { display: grid; gap: 12px; }
+.account-panel { max-width: 590px; }
+.account-form { display: grid; gap: 10px; padding-top: 16px; margin-top: 16px; border-top: 1px solid var(--border); }
+.account-form h3 { margin: 0; font-size: 15px; font-weight: 750; }
+.account-form label { display: grid; gap: 6px; font-size: 13px; font-weight: 700; }
+.account-form input { border: 1px solid var(--border); background: var(--surface-inset); border-radius: 8px; padding: 8px 10px; min-height: 44px; width: 100%; max-width: 360px; font-size: 16px; }
+.account-form p { margin: 0; }
+.account-panel p { overflow-wrap: anywhere; }
+.account-panel .account-message { color: var(--accent); margin-block: 10px; }
+.account-panel :is(.primary-button, .secondary-button) { min-height: 44px; }
+.profile-nav:has(.profile-tab:nth-child(3)) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+@media (max-width: 680px), (max-width: 960px) and (max-height: 520px) and (pointer: coarse) {
+  .profile-nav:has(.profile-tab:nth-child(3)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profile-tab:nth-child(3) { grid-column: 1 / -1; }
+}

@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwind from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -13,6 +13,14 @@ export default defineConfig({
     },
   },
   plugins: [
+    {
+      name: 'validate-account-settings',
+      config(_config, { mode }) {
+        const { VITE_SUPABASE_URL: url, VITE_SUPABASE_PUBLISHABLE_KEY: key } = loadEnv(mode, process.cwd(), 'VITE_SUPABASE_')
+        if (Boolean(url) !== Boolean(key)) throw new Error('Set both Supabase account sync environment variables or leave both empty.')
+        if (key && !key.startsWith('sb_publishable_')) throw new Error('Use a Supabase publishable key for the web build.')
+      },
+    },
     react(),
     tailwind(),
     VitePWA({

@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Activity, ArrowDown, ArrowRight, ArrowUpRight, BookOpen, ChartNoAxesColumn, CheckCircle2, ChevronDown,
@@ -20,7 +21,7 @@ import { DatabaseBoundary } from './components/DatabaseBoundary'
 import banner from './assets/cunning-hares.webp'
 import { databaseSections, databaseTitle, dbPath } from './database/navigation'
 import { useCollection } from './database/collection'
-import type { Collection } from './database/collection'
+import type { Collection, CollectionState } from './database/collection'
 
 const DatabaseApp = lazy(() => import('./database/DatabaseApp'))
 const CollectionPage = lazy(() => import('./database/CollectionPage'))
@@ -33,7 +34,7 @@ const navItems = [
   { path: '/database', label: 'Database', icon: Database },
   { path: '/profile', label: 'Profile', icon: UserRound },
 ]
-const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/profile': 'Profile', '/profile/collection': 'Profile', '/settings': 'Settings' }
+const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/profile': 'Profile', '/profile/collection': 'Profile', '/profile/account': 'Profile', '/settings': 'Settings' }
 const databaseShortcuts = databaseSections.filter(({ key }) => ['agents', 'engines', 'tiers', 'teams', 'banners'].includes(key))
 const versions = [...new Set(entries.flatMap((entry) => entry.releaseVersion ? [entry.releaseVersion] : []))]
   .sort((first, second) => first.localeCompare(second, undefined, { numeric: true })).reverse()
@@ -72,7 +73,7 @@ function Shell({ children }: { children: React.ReactNode }) {
   const [globalSearch, setGlobalSearch] = useState('')
   const inDatabase = pathname === '/database' || pathname.startsWith('/database/')
   const searchDatabase = inDatabase || pathname === '/profile/collection'
-  const breadcrumb = inDatabase ? 'Game Database' : ['/dashboard', '/profile', '/profile/collection', '/settings'].includes(pathname) ? 'Zenlessentials' : 'Story Archive'
+  const breadcrumb = inDatabase ? 'Game Database' : pathname.startsWith('/profile') || ['/dashboard', '/settings'].includes(pathname) ? 'Zenlessentials' : 'Story Archive'
   const title = inDatabase ? databaseTitle(pathname) : views[pathname] ?? 'Page unavailable'
   useEffect(() => {
     document.title = title + ' — Zenlessentials'
@@ -370,7 +371,7 @@ function SeasonBreakdown({ tracker }: { tracker: Tracker }) {
   </section>
 }
 
-function Profile({ tracker, collection }: { tracker: Tracker; collection: Collection }) {
+function Profile({ tracker, collection, accountLabel }: { tracker: Tracker; collection: Collection; accountLabel?: string }) {
   const { done, total } = totals(entries, tracker.progress)
   const owned = Object.keys(collection.agents).length
   const squads = collection.teams.length
@@ -383,6 +384,9 @@ function Profile({ tracker, collection }: { tracker: Tracker; collection: Collec
       <NavLink to="/profile/collection" className="panel profile-tab">
         <Layers3 size={22} aria-hidden="true" /><span><strong>Collection</strong><small>{owned} {owned === 1 ? 'Agent' : 'Agents'} · {squads} {squads === 1 ? 'squad' : 'squads'}</small></span><ChevronRight size={16} aria-hidden="true" />
       </NavLink>
+      {accountLabel && <NavLink to="/profile/account" className="panel profile-tab">
+        <UserRound size={22} aria-hidden="true" /><span><strong>Account</strong><small>{accountLabel}</small></span><ChevronRight size={16} aria-hidden="true" />
+      </NavLink>}
     </nav>
     <Outlet />
   </>
@@ -446,9 +450,15 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
   </>
 }
 
-export default function App() {
+export default function App({ account, accountLabel }: { account?: ReactNode; accountLabel?: string }) {
   const tracker = useTracker()
   const collection = useCollection()
+  return <Zenlessentials tracker={tracker} collection={collection} account={account} accountLabel={accountLabel} />
+}
+
+export function Zenlessentials({ tracker, collection, account, accountLabel }: {
+  tracker: Tracker; collection: CollectionState; account?: ReactNode; accountLabel?: string
+}) {
   const next = recommend(tracker)
 
   useLayoutEffect(() => {
@@ -460,7 +470,7 @@ export default function App() {
 
   return <Shell>
     {tracker.storageError && <p className="storage-message" role="alert">Browser storage is unavailable. Export a backup before leaving this page.</p>}
-    {collection.storageError && <p className="storage-message" role="alert">Your browser could not save your collection. <Link to="/profile/collection">Export a collection backup</Link> before leaving.</p>}
+    {collection.storageError && !tracker.storageError && <p className="storage-message" role="alert">Your browser could not save your collection. <Link to="/profile/collection">Export a collection backup</Link> before leaving.</p>}
     <Routes>
       <Route path="/" element={<Timeline tracker={tracker} next={next} />} />
       <Route path="/timeline" element={<Timeline tracker={tracker} next={next} />} />
@@ -470,9 +480,10 @@ export default function App() {
       <Route path="/events" element={<Library key="events" tracker={tracker} mode="events" />} />
       <Route path="/database/collection" element={<Navigate to="/profile/collection" replace />} />
       <Route path={dbPath() + '/*'} element={<DatabaseBoundary><Suspense fallback={<p role="status">Loading database…</p>}><DatabaseApp state={collection} /></Suspense></DatabaseBoundary>} />
-      <Route path="/profile" element={<Profile tracker={tracker} collection={collection.collection} />}>
+      <Route path="/profile" element={<Profile tracker={tracker} collection={collection.collection} accountLabel={accountLabel} />}>
         <Route index element={<StoryStatistics tracker={tracker} />} />
         <Route path="collection" element={<DatabaseBoundary collection><Suspense fallback={<p role="status">Loading collection…</p>}><CollectionPage state={collection} /></Suspense></DatabaseBoundary>} />
+        {account && <Route path="account" element={account} />}
       </Route>
       <Route path="/stats" element={<Navigate to="/profile" replace />} />
       <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
