@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react'
 import type { Agent, Bangboo, Condition } from './model'
+import { tierOrder } from './tiers'
+import type { Tier } from './tiers'
 
 export type SavedTeam = { id: string; name: string; agentIds: string[]; bangbooId: string }
 type Bookshelf = Record<string, number>
 export type Collection = {
   agents: Bookshelf; engines: Bookshelf; bangboo: Bookshelf
-  favorites: string[]; planned: string[]; teams: SavedTeam[]; tiers: Record<string, string>
+  favorites: string[]; planned: string[]; teams: SavedTeam[]; tiers: Record<string, Tier>
 }
 export const collectionKey = 'zenlessentials.collection'
 export const emptyCollection: Collection = { agents: {}, engines: {}, bangboo: {}, favorites: [], planned: [], teams: [], tiers: {} }
 const id = (v: unknown): v is string => typeof v === 'string' && /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v) && v.length < 90 && v !== 'constructor' && v !== 'prototype'
 const isRecord = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v)
 const isList = (v: unknown): v is string[] => Array.isArray(v) && v.every(id)
-export const personalTiers = ['S', 'A', 'B', 'C', 'D'] as const
+const legacyTierOrder = ['S', 'A', 'B', 'C', 'D']
 
 function owned(value: unknown, min: number, max: number): Bookshelf {
   if (!isRecord(value)) throw new Error('Invalid ownership records.')
@@ -38,8 +40,9 @@ export function parseCollection(raw: string): Collection {
   })
   if (new Set(parsedTeams.map((team) => team.id)).size !== parsedTeams.length) throw new Error('Duplicate squad IDs.')
   const parsedTiers = Object.fromEntries(Object.entries(tiers).map(([key, tier]) => {
-    if (!id(key) || !personalTiers.some((valid) => tier === valid)) throw new Error('Invalid personal tier.')
-    return [key, tier as string]
+    const normalized = tierOrder.find((value) => value === tier) ?? tierOrder[legacyTierOrder.findIndex((value) => value === tier)]
+    if (!id(key) || !normalized) throw new Error('Invalid personal tier.')
+    return [key, normalized]
   }))
   return {
     agents: owned(agents, 0, 6), engines: owned(engines, 1, 5), bangboo: owned(bangboo, 1, 5),

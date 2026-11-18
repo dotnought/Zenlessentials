@@ -175,12 +175,12 @@
 .db-import-confirm { margin-top: 9px; border-top: 1px solid var(--border); }
 .db-tier-row { display: grid; grid-template-columns: 74px minmax(0,1fr); overflow: hidden; margin: 8px 0; --tier: #b4b9c2; }
 .db-tier-row h2 { display: grid; align-items: center; justify-items: center; color: #18181b; font: 800 35px/1 var(--title-font); margin: 0; background: var(--tier); }
-.db-tier-s { --tier: #eed267; }
-.db-tier-a { --tier: #fdac81; }
-.db-tier-b { --tier: #d6b3ff; }
-.db-tier-c { --tier: #94d8f0; }
-.db-tier-d { --tier: #9ed3ad; }
-.db-tier-unrated h2 { font-size: 19px; }
+.db-tier-row[data-tier="T0"] { --tier: #eed267; }
+.db-tier-row[data-tier="T0.5"] { --tier: #fdac81; }
+.db-tier-row[data-tier="T1"] { --tier: #d6b3ff; }
+.db-tier-row[data-tier="T1.5"] { --tier: #94d8f0; }
+.db-tier-row[data-tier="T2"] { --tier: #9ed3ad; }
+.db-tier-row[data-tier="Unranked"] h2 { font-size: 19px; }
 .db-tier-row > div { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,77px),1fr)); gap: 5px; padding: 7px; }
 .db-tier-agent { min-width: 0; text-align: center; }
 .db-tier-agent a { display: grid; gap: 3px; color: #f0edf1; }
@@ -234,7 +234,8 @@
   .db-identity .db-rank { width: 23px; height: 23px; font-size: 20px; }
   .db-facets .db-control { flex: 1 1 90px; }
   .db-tier-row { grid-template-columns: 46px minmax(0,1fr); }
-  .db-tier-unrated h2 { font-size: 13px; }
+  .db-tier-row:is([data-tier="T0.5"], [data-tier="T1.5"]) h2 { font-size: 26px; }
+  .db-tier-row[data-tier="Unranked"] h2 { font-size: 12px; }
 }
 @media (any-pointer: coarse) {
   .db-control input, .db-control select, .db-tier-agent select { font-size: 16px; }

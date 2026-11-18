@@ -18,7 +18,7 @@ Progress and preferences are saved in this browser’s local storage for this si
 ## Use the game database
 
 - **Database** opens the Agents, W-Engines, Drive Discs and Bangboo catalogs. Browse or use the search bar to find records. Agent profiles connect their skills, builds and banner history to related story entries.
-- **Team Builder** checks squad ability conditions and supports locally saved squads. **Tier List** includes sourced endgame appearance rates and saved personal rankings.
+- **Team Builder** checks squad ability conditions and supports locally saved squads. **Tier List** shows T0–T2 placements, sourced endgame appearance rates and saved personal rankings.
 - **Banners** shows the verified Signal Search archive and currently running channels. **Guides** covers disc stats, squad building, progression and the banner schedule.
 - **Collection** tracks ownership, Mindscapes, Overclock, favorites and planned acquisitions. Its import/export is separate from story progress.
 

@@ -74,3 +74,18 @@ test('collection backups preserve valid unknown IDs and reject duplicate team me
     ...store,teams:[{id:'squad-duplicate',name:'Duplicate',agentIds:['agent-1011','agent-1011','agent-1011'],bangbooId:''}],
   })),/Invalid saved squad/)
 })
+
+test('collection backups migrate personal tiers by rank without losing ownership', () => {
+  const saved = JSON.stringify({
+    format: 'zenlessentials-collection', version: 1,
+    collection: { ...emptyCollection, agents: { 'agent-1011': 2 }, tiers: {
+      'agent-1011': 'S', 'agent-1021': 'A', 'agent-1031': 'B', 'agent-1041': 'C', 'agent-1051': 'D', 'agent-1061': 'T0.5',
+    } },
+  })
+  const collection = parseCollection(saved)
+  assert.deepEqual(collection.agents, { 'agent-1011': 2 })
+  assert.deepEqual(collection.tiers, {
+    'agent-1011': 'T0', 'agent-1021': 'T0.5', 'agent-1031': 'T1', 'agent-1041': 'T1.5', 'agent-1051': 'T2', 'agent-1061': 'T0.5',
+  })
+  assert.deepEqual(parseCollection(serializeCollection(collection)), collection)
+})

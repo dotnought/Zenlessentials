@@ -7,6 +7,7 @@ import { entryByID } from '../../src/data/timeline'
 import { builds, guides, recommendedTeams } from '../../src/database/editorial'
 import type { AgentKit, Asset, CatalogData, Condition, MaterialCost, RecordBase } from '../../src/database/model'
 import { compareVersion } from '../../src/database/mechanics'
+import { rankedAgents, tierByAgent } from '../../src/database/tiers'
 
 const data = raw as CatalogData
 const errors: string[] = []
@@ -26,6 +27,9 @@ const ids = <T extends { id: string | number }>(records: readonly T[], label: st
   return map
 }
 const a = ids(data.agents,'Agents')
+const rankedIds = Object.values(rankedAgents).flat()
+check(tierByAgent.size === rankedIds.length,'An Agent appears in more than one tier assignment.')
+for (const id of tierByAgent.keys()) check(a.has(id), 'Unknown tier Agent ' + id)
 const w = ids(data.engines,'W-Engines')
 const d = ids(data.discs,'Drive Discs')
 const b = ids(data.bangboo,'Bangboo')
