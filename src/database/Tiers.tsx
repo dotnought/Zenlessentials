@@ -9,7 +9,6 @@ import { DBHeading, Empty, Thumbnail } from './ui'
 import { tierByAgent, tierOrder } from './tiers'
 import type { Tier } from './tiers'
 
-const tiers = [...tierOrder, 'Unranked'] as const
 const specialties = [...new Set(agents.map((agent) => agent.specialty))].sort()
 
 export function TierList({ state }: { state: CollectionState }) {
@@ -17,9 +16,12 @@ export function TierList({ state }: { state: CollectionState }) {
   const [role,setRole] = useState('')
   const [query,setQuery] = useState('')
   const [tierFilter, setTierFilter] = useState('')
-  const rank = (id: string) => (mode === 'personal' ? state.collection.tiers[id] : tierByAgent.get(id)) ?? 'Unranked'
-  const selected = agents.filter((agent) => (!role || agent.specialty === role)
-    && (!tierFilter || rank(agent.id) === tierFilter) && matchesQuery(query, agent.name, ...agent.aliases))
+  const rank = (id: string) => (mode === 'personal' ? state.collection.tiers[id] : undefined) ?? tierByAgent.get(id)
+  const selected = agents.filter((agent) => {
+    const tier = rank(agent.id)
+    return tier && (!role || agent.specialty === role) && (!tierFilter || tier === tierFilter)
+      && matchesQuery(query, agent.name, ...agent.aliases)
+  })
   return <>
     <DBHeading title="Tier List" description="Browse the T0–T2 rankings or save your own placements." />
     <div className="panel db-toolbar">
@@ -33,12 +35,12 @@ export function TierList({ state }: { state: CollectionState }) {
           <option value="">All specialties</option>{specialties.map((item) => <option key={item}>{item}</option>)}
         </select></label>
         <label className="db-control">Tier<select value={tierFilter} onChange={(event) => setTierFilter(event.target.value)}>
-          <option value="">All tiers</option>{tiers.map((item) => <option key={item}>{item}</option>)}
+          <option value="">All tiers</option>{tierOrder.map((item) => <option key={item}>{item}</option>)}
         </select></label>
       </div>
     </div>
     {!selected.length && <Empty>No Agents match these filters.</Empty>}
-    {tiers.map((tier) => {
+    {tierOrder.map((tier) => {
       const members = selected.filter((agent) => rank(agent.id) === tier).sort((a, b) => a.name.localeCompare(b.name))
       if (!members.length) return null
       return <section className="panel db-tier-row" data-tier={tier} key={tier}>
@@ -57,7 +59,7 @@ export function TierList({ state }: { state: CollectionState }) {
               return { ...current, tiers: updated }
             })
           }}>
-            <option value="">Unranked</option>{tierOrder.map((item) => <option key={item}>{item}</option>)}
+            <option value="">Default</option>{tierOrder.map((item) => <option key={item}>{item}</option>)}
           </select>}
         </article>)}</div>
       </section>

@@ -180,7 +180,6 @@
 .db-tier-row[data-tier="T1"] { --tier: #d6b3ff; }
 .db-tier-row[data-tier="T1.5"] { --tier: #94d8f0; }
 .db-tier-row[data-tier="T2"] { --tier: #9ed3ad; }
-.db-tier-row[data-tier="Unranked"] h2 { font-size: 19px; }
 .db-tier-row > div { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,77px),1fr)); gap: 5px; padding: 7px; }
 .db-tier-agent { min-width: 0; text-align: center; }
 .db-tier-agent a { display: grid; gap: 3px; color: #f0edf1; }
@@ -235,7 +234,6 @@
   .db-facets .db-control { flex: 1 1 90px; }
   .db-tier-row { grid-template-columns: 46px minmax(0,1fr); }
   .db-tier-row:is([data-tier="T0.5"], [data-tier="T1.5"]) h2 { font-size: 26px; }
-  .db-tier-row[data-tier="Unranked"] h2 { font-size: 12px; }
 }
 @media (any-pointer: coarse) {
   .db-control input, .db-control select, .db-tier-agent select { font-size: 16px; }
