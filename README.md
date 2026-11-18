@@ -15,7 +15,7 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 
 Progress and preferences are saved in this browser’s local storage for this site’s origin. Deployments on the same origin keep the data. Use **Settings → Export JSON** to back it up or move it to another browser, device, domain, or deploy preview. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
 
-When account sync is configured, **Profile → Account** lets you sign in with Google or an email code and sync your saves across devices. See [Account sync setup and behavior](ACCOUNT_SYNC.md).
+When account sync is configured, **Profile → Account** lets you sign in with Google or an email link and sync your saves across devices. See [Account sync setup and behavior](ACCOUNT_SYNC.md).
 
 ## Use the game database
 

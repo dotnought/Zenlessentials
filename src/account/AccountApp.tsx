@@ -10,7 +10,8 @@ import { useCloudSaves } from './useCloudSaves'
 import './account.css'
 
 const callback = new URLSearchParams(window.location.search)
-const oauthReturned = callback.has('code') || callback.has('error') || callback.has('error_code')
+const returnedFromSignIn = callback.has('code') || callback.has('error') || callback.has('error_code')
+const signInReturnUrl = window.location.origin + '/profile/account'
 const sessionKey = 'zenlessentials.auth'
 type Identity = Pick<User, 'id' | 'email'>
 
@@ -40,11 +41,11 @@ const client = makeClient()
 
 export default function AccountApp() {
   const [user, setUser] = useState<Identity | null | undefined>(() => navigator.onLine ? undefined : cachedIdentity())
-  const [oauthProblem, setOauthProblem] = useState(oauthReturned)
+  const [callbackProblem, setCallbackProblem] = useState(returnedFromSignIn)
   useEffect(() => {
     if (!client) return
     const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
-      if (session) setOauthProblem(false)
+      if (session) setCallbackProblem(false)
       setUser(session?.user ?? (event === 'INITIAL_SESSION' ? cachedIdentity() : null))
     })
     return () => subscription.unsubscribe()
@@ -55,16 +56,17 @@ export default function AccountApp() {
   } />
   if (user === undefined) return <p className="account-loading" role="status">Checking account…</p>
   if (user) return <SignedIn key={user.id} client={client} user={user} />
-  return <App accountLabel="Sign in to sync" account={<SignIn client={client} oauthProblem={oauthProblem} />} />
+  return <App accountLabel="Sign in to sync" account={<SignIn client={client} callbackProblem={callbackProblem} />} />
 }
 
-function SignIn({ client, oauthProblem }: { client: SupabaseClient; oauthProblem: boolean }) {
+function SignIn({ client, callbackProblem }: { client: SupabaseClient; callbackProblem: boolean }) {
   const [creating, setCreating] = useState(false)
   const [email, setEmail] = useState('')
   const [target, setTarget] = useState('')
+  const [enteringCode, setEnteringCode] = useState(false)
   const [code, setCode] = useState('')
   const [busy, setBusy] = useState(false)
-  const [message, setMessage] = useState(oauthProblem ? 'Google sign-in didn’t finish. Try again or use an email code.' : '')
+  const [message, setMessage] = useState(callbackProblem ? 'Sign-in didn’t finish. Start again here and open any email link in this same browser.' : '')
 
   async function perform(action: () => Promise<void>) {
     setBusy(true)
@@ -80,25 +82,30 @@ function SignIn({ client, oauthProblem }: { client: SupabaseClient; oauthProblem
 
   async function googleSignIn() {
     const { error } = await client.auth.signInWithOAuth({
-      provider: 'google', options: { redirectTo: window.location.origin + '/profile/account' },
+      provider: 'google', options: { redirectTo: signInReturnUrl },
     })
-    if (error) setMessage('Couldn’t start Google sign-in. Try again or use an email code.')
+    if (error) setMessage('Couldn’t start Google sign-in. Try again or sign in with email.')
   }
 
-  async function sendCode() {
+  async function sendEmail() {
     const address = email.trim()
-    const { error } = await client.auth.signInWithOtp({ email: address, options: { shouldCreateUser: creating } })
+    const { error } = await client.auth.signInWithOtp({
+      email: address, options: { shouldCreateUser: creating, emailRedirectTo: signInReturnUrl },
+    })
     if (error) {
-      setMessage(error.status === 429 ? 'Wait a minute before requesting another code.' : 'Couldn’t send a code. Check the address and try again.')
+      if (error.status === 429) setMessage('Too many emails requested. Try again later.')
+      else if (error.code === 'email_address_not_authorized') setMessage('Email delivery is limited to Supabase project team addresses. Use a team address.')
+      else setMessage('Couldn’t send a sign-in email. Check the address and try again.')
       return
     }
     setTarget(address)
-    setMessage('Check your email for the sign-in code.')
+    setCode('')
+    setMessage('Sign-in email sent.')
   }
 
   async function verifyCode() {
     const { error } = await client.auth.verifyOtp({ email: target, token: code.trim(), type: 'email' })
-    if (error) setMessage('That code couldn’t be verified. Check it or request a new one.')
+    if (error) setMessage('That code couldn’t be verified. Check it or request a new email.')
   }
 
   return <section className="panel settings-panel account-panel">
@@ -107,23 +114,27 @@ function SignIn({ client, oauthProblem }: { client: SupabaseClient; oauthProblem
     <button type="button" className="primary-button" disabled={busy} onClick={() => void perform(googleSignIn)}>Continue with Google</button>
     <form className="account-form" onSubmit={(event) => {
       event.preventDefault()
-      if (!busy) void perform(target ? verifyCode : sendCode)
+      if (busy) return
+      if (!target) void perform(sendEmail)
+      else if (enteringCode) void perform(verifyCode)
     }}>
       <h3>{creating ? 'Create an account' : 'Sign in with email'}</h3>
       {target ? <>
-        <p>Enter the code sent to <strong>{target}</strong>.</p>
-        <label>Verification code<input autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" maxLength={10}
-          required value={code} onChange={(event) => setCode(event.target.value)} /></label>
+        {enteringCode ? <p>Enter the code sent to <strong>{target}</strong>.</p>
+          : <p>Check <strong>{target}</strong> and open the sign-in link in this same browser.</p>}
+        {enteringCode && <label>Verification code<input autoComplete="one-time-code" inputMode="numeric" pattern="[0-9]{6,10}" maxLength={10}
+          required value={code} onChange={(event) => setCode(event.target.value)} /></label>}
         <div className="settings-actions">
-          <button className="primary-button" disabled={busy} type="submit">Verify and sign in</button>
-          <button className="secondary-button" disabled={busy} type="button" onClick={() => void perform(sendCode)}>Resend code</button>
-          <button className="secondary-button" disabled={busy} type="button" onClick={() => { setTarget(''); setCode(''); setMessage('') }}>Change email</button>
+          {enteringCode ? <button className="primary-button" disabled={busy} type="submit">Verify and sign in</button>
+            : <button className="secondary-button" disabled={busy} type="button" onClick={() => setEnteringCode(true)}>Enter a code</button>}
+          <button className="secondary-button" disabled={busy} type="button" onClick={() => void perform(sendEmail)}>Resend email</button>
+          <button className="secondary-button" disabled={busy} type="button" onClick={() => { setTarget(''); setEnteringCode(false); setCode(''); setMessage('') }}>Change email</button>
         </div>
       </> : <>
         <label>Email address<input type="email" autoComplete="email" maxLength={254} required value={email}
           onChange={(event) => setEmail(event.target.value)} /></label>
         <div className="settings-actions">
-          <button className="primary-button" disabled={busy} type="submit">Send email code</button>
+          <button className="primary-button" disabled={busy} type="submit">Send sign-in email</button>
           <button className="secondary-button" disabled={busy} type="button" onClick={() => { setCreating(!creating); setMessage('') }}>
             {creating ? 'Already have an account?' : 'Create an account'}
           </button>

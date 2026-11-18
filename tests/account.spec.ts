@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import type { BrowserContext } from '@playwright/test'
+import { createHash } from 'node:crypto'
 import type { Saves } from '../src/account/saves'
 
 const authOrigin = 'https://zenlessentials-sync-test.supabase.co'
@@ -11,7 +12,7 @@ test.skip(process.env.VITE_SUPABASE_URL !== authOrigin, 'Requires the build conf
 
 function backend() {
   let row: { revision: number; snapshot: Saves } | undefined
-  const codeRequests: boolean[] = []
+  const emailRequests: { createUser: boolean; redirectTo: string | null; challenge: string; method: string }[] = []
   const googleRequests: URL[] = []
   const base64 = (value: unknown) => Buffer.from(JSON.stringify(value)).toString('base64url')
   const expires = Math.floor(Date.now() / 1000) + 3600
@@ -33,7 +34,8 @@ function backend() {
       const json = (value: unknown, status = 200) => route.fulfill({ json: value, headers, status })
       if (method === 'OPTIONS') return route.fulfill({ status: 204, headers })
       if (url.pathname === '/auth/v1/otp') {
-        codeRequests.push(request.postDataJSON().create_user)
+        const body = request.postDataJSON()
+        emailRequests.push({ createUser: body.create_user, redirectTo: url.searchParams.get('redirect_to'), challenge: body.code_challenge, method: body.code_challenge_method })
         return json({})
       }
       if (url.pathname === '/auth/v1/verify') {
@@ -47,7 +49,10 @@ function backend() {
         return route.fulfill({ contentType: 'text/html', body: '<script>location.replace(' + JSON.stringify(location.href) + ')</script>' })
       }
       if (url.pathname === '/auth/v1/token' && url.searchParams.get('grant_type') === 'pkce') {
-        expect(request.postDataJSON()).toMatchObject({ auth_code: 'test-oauth-code', code_verifier: expect.any(String) })
+        const { auth_code, code_verifier } = request.postDataJSON()
+        const expectedChallenge = auth_code === 'test-email-link-code' ? emailRequests.at(-1)?.challenge : googleRequests[0]?.searchParams.get('code_challenge')
+        expect(['test-email-link-code', 'test-oauth-code']).toContain(auth_code)
+        expect(createHash('sha256').update(code_verifier).digest('base64url')).toBe(expectedChallenge)
         return json(session)
       }
       if (url.pathname === '/auth/v1/logout') return route.fulfill({ status: 204, headers })
@@ -72,7 +77,7 @@ function backend() {
     })
   }
 
-  return { connect, codeRequests, googleRequests, saved: () => row?.snapshot }
+  return { connect, emailRequests, googleRequests, saved: () => row?.snapshot }
 }
 
 test('signs in with email and syncs a guest import and offline edits across devices', async ({ page, context, browser, baseURL }) => {
@@ -86,7 +91,8 @@ test('signs in with email and syncs a guest import and offline edits across devi
   await page.goto('/profile/account')
   await page.getByRole('button', { name: 'Create an account' }).click()
   await page.getByLabel('Email address').fill(email)
-  await page.getByRole('button', { name: 'Send email code' }).click()
+  await page.getByRole('button', { name: 'Send sign-in email' }).click()
+  await page.getByRole('button', { name: 'Enter a code' }).click()
   await page.getByLabel('Verification code').fill('123456')
   await page.getByRole('button', { name: 'Verify and sign in' }).click()
   await page.getByRole('button', { name: 'Import guest saves' }).click()
@@ -99,11 +105,12 @@ test('signs in with email and syncs a guest import and offline edits across devi
     const phone = await second.newPage()
     await phone.goto('/profile/account')
     await phone.getByLabel('Email address').fill(email)
-    await phone.getByRole('button', { name: 'Send email code' }).click()
+    await phone.getByRole('button', { name: 'Send sign-in email' }).click()
+    await phone.getByRole('button', { name: 'Enter a code' }).click()
     await phone.getByLabel('Verification code').fill('123456')
     await phone.getByRole('button', { name: 'Verify and sign in' }).click()
     await expect(phone.getByText('Up to date.', { exact: true })).toBeVisible()
-    expect(api.codeRequests).toEqual([true, false])
+    expect(api.emailRequests.map(({ createUser }) => createUser)).toEqual([true, false])
     await expect(phone.getByRole('link', { name: /Story Progress.*1\// })).toBeVisible()
     await expect(phone.locator('html')).toHaveAttribute('data-theme', 'ether')
 
@@ -129,6 +136,24 @@ test('signs in with email and syncs a guest import and offline edits across devi
   } finally {
     await second.close()
   }
+})
+
+test('signs in when the default signup email link opens in another tab', async ({ page, context }) => {
+  const api = backend()
+  await api.connect(context)
+  await page.goto('/profile/account')
+  await page.getByRole('button', { name: 'Create an account' }).click()
+  await page.getByLabel('Email address').fill(email)
+  await page.getByRole('button', { name: 'Send sign-in email' }).click()
+  await expect(page.getByText('Sign-in email sent.')).toBeVisible()
+  const redirectTo = new URL('/profile/account', page.url())
+  expect(api.emailRequests).toEqual([{ createUser: true, redirectTo: redirectTo.href, challenge: expect.any(String), method: 's256' }])
+  redirectTo.searchParams.set('code', 'test-email-link-code')
+  const link = await context.newPage()
+  await link.goto(redirectTo.href)
+  await expect(link.getByText(email, { exact: true })).toBeVisible()
+  await expect(link.getByText('Up to date.', { exact: true })).toBeVisible()
+  expect(new URL(link.url()).searchParams.has('code')).toBe(false)
 })
 
 test('returns from Google OAuth through a PKCE exchange', async ({ page, context }) => {
