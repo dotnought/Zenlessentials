@@ -7,9 +7,9 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 ## Use the tracker
 
 - **Timeline** is the default view. Switch seasons, jump to a chapter or the next incomplete item, and expand cards for prerequisites, related stories, and sources.
-- **Dashboard** shows the next core story, optional stories to consider first, your current chapter, and recent completions.
+- **Dashboard** shows the next core story, your current chapter, recent completions, and shortcuts to the Game Database and your collection.
 - **Content Library** searches titles, characters, categories, and summaries. It includes filters for season, game version, progress, and availability, with dedicated Agent Story and Event views.
-- **Statistics** shows progress across the archive, by season, and by content type. Grouped stories count their individual parts.
+- **Profile → Story Progress** shows progress across the archive, by season, and by content type. Grouped stories count their individual parts. Switch to **Collection** for your roster, wishlist, and saved squads.
 - **Settings** controls spoilers, optional content, expired content, and completed items. Expired events remain trackable and are recorded as watched. Replayable archived events support both played and watched.
 - **Settings → Appearance** offers Signal Yellow, Hollow Blue, Ether Violet, and Calydon Orange. Theme choices are saved automatically in this browser, independently of progress backups.
 
@@ -20,7 +20,7 @@ Progress and preferences are saved in this browser’s local storage for this si
 - **Database** opens the Agents, W-Engines, Drive Discs and Bangboo catalogs. Browse or use the search bar to find records. Agent profiles connect their skills, builds and banner history to related story entries.
 - **Team Builder** checks squad ability conditions and supports locally saved squads. **Tier List** shows T0–T2 placements and saved personal rankings. Agent profiles show sampled endgame appearance rates on **Overview**.
 - **Banners** shows the verified Signal Search archive and currently running channels. **Guides** covers disc stats, squad building, progression and the banner schedule.
-- **Collection** tracks ownership, Mindscapes, Overclock, favorites and planned acquisitions. Its import/export is separate from story progress.
+- **Profile → Collection** tracks ownership, Mindscapes, Overclock, favorites, planned acquisitions, and saved squads. Collection backups also include personal tiers. Use Settings for story progress backups.
 
 The factual catalog and artwork are served by Zenlessentials. See [Database sources, audit and update procedure](DATABASE_SOURCES.md) for coverage.
 
@@ -30,7 +30,7 @@ The factual catalog and artwork are served by Zenlessentials. See [Database sour
 2. Turn on **Open as Web App** if Safari offers it, then tap **Add**.
 3. Open Zenlessentials from its Home Screen icon while online so it can save the app for offline use.
 
-The timeline, filters, statistics, theme picker, and checklists work offline after that first online launch finishes loading. The database downloads its catalog and caches artwork as you visit pages. Open the database pages you need while online first. Links to external sources still need an internet connection.
+The timeline, filters, Profile story statistics, theme picker, and checklists work offline after that first online launch finishes loading. The database downloads its catalog and caches artwork as you visit pages. Open the collection and any database pages you need while online first. Links to external sources still need an internet connection.
 
 Safari and the installed app use separate local storage. To bring your quest progress over, export it from Safari before opening the installed app, then choose **Settings → Import JSON** in the app. Use **Share backup → Save to Files** where supported, or download the file with **Export JSON**. Back up progress before removing an existing Home Screen installation. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
 

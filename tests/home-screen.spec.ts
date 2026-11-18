@@ -43,6 +43,9 @@ test('opens offline, keeps the theme and saves quest progress across reloads', a
   await expect(page.locator('.hero-art')).toHaveJSProperty('naturalWidth', 1600)
   await page.goto('/library?q=The+Great+Aquarium+Rescue')
   await expect(page.getByRole('checkbox', { name: 'Complete The Great Aquarium Rescue' })).toBeVisible()
+  await page.goto('/profile')
+  await expect(page.getByRole('heading', { name: 'Progress by season' })).toBeVisible()
+  await expect(page.getByRole('navigation', { name: 'Profile sections' }).getByRole('link', { name: /Story Progress.*1\// })).toBeVisible()
 })
 
 test('keeps phone controls inside the safe area', async ({ page }, testInfo) => {

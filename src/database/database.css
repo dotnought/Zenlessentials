@@ -171,6 +171,9 @@
 .db-save-squad { margin: 10px 0 2px; }
 .db-save-squad .primary-button:disabled { opacity: .48; }
 .db-collection-counts { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.profile-collection-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 16px 0 9px; }
+.profile-collection-heading h2 { font: 800 27px/1 var(--title-font); margin: 0; }
+.profile-backup-link { display: inline-flex; align-items: center; gap: 4px; margin-top: 9px; color: var(--accent); font-size: 12px; }
 .db-collection-card .db-actions { margin-top: 8px; }
 .db-import-confirm { margin-top: 9px; border-top: 1px solid var(--border); }
 .db-tier-row { display: grid; grid-template-columns: 74px minmax(0,1fr); overflow: hidden; margin: 8px 0; --tier: #b4b9c2; }

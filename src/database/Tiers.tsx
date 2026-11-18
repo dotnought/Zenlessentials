@@ -3,7 +3,7 @@ import type { Announcements, CollisionDetection, DragEndEvent } from '@dnd-kit/c
 import { GripHorizontal, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { agentByID, agents } from './data'
 import type { CollectionState } from './collection'
 import { matchesQuery } from './mechanics'
@@ -31,7 +31,8 @@ const dragAccessibility = {
 }
 
 export function TierList({ state }: { state: CollectionState }) {
-  const [mode, setMode] = useState<'rankings' | 'personal'>('rankings')
+  const [params, setParams] = useSearchParams()
+  const mode = params.get('view') === 'personal' ? 'personal' : 'rankings'
   const [role, setRole] = useState('')
   const [query, setQuery] = useState('')
   const [tierFilter, setTierFilter] = useState('')
@@ -81,7 +82,11 @@ export function TierList({ state }: { state: CollectionState }) {
     <div className="panel db-toolbar">
       <div className="db-tab-row db-plain-tabs" aria-label="Tier list view">
         {([['rankings','Rankings'],['personal','My tier list']] as const).map(([value,label]) =>
-          <button key={value} type="button" aria-pressed={mode === value} onClick={() => { setChoosing(undefined); setMode(value) }}>{label}</button>)}
+          <button key={value} type="button" aria-pressed={mode === value} onClick={() => {
+            if (value === mode) return
+            setChoosing(undefined)
+            setParams(value === 'personal' ? { view: 'personal' } : {}, { replace: true })
+          }}>{label}</button>)}
       </div>
       <label className="search-field"><Search size={16} /><input type="search" aria-label="Search tier list" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find an Agent…" /></label>
       <div className="db-facets">

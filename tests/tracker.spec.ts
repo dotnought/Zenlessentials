@@ -78,10 +78,11 @@ test('validates, imports and exports JSON and requires confirmation to reset', a
 })
 
 test('production build serves nested routes and fits the viewport', async ({ page }) => {
-  for (const [path, heading] of [['/agents', 'Agent Stories'], ['/events', 'Events'], ['/stats', 'Statistics'], ['/timeline', 'STORY TIMELINE']]) {
+  for (const [path, heading] of [['/agents', 'Agent Stories'], ['/events', 'Events'], ['/stats', 'Profile'], ['/timeline', 'STORY TIMELINE']]) {
     const response = await page.goto(path)
     expect(response?.status()).toBe(200)
     await expect(page.getByRole('heading', { name: heading, exact: true, level: 1 })).toBeVisible()
+    if (path === '/stats') await expect(page).toHaveURL('/profile')
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
   }
 })

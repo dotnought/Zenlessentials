@@ -1,9 +1,9 @@
 import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
-import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, NavLink, Outlet, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Activity, ArrowDown, ArrowRight, ArrowUpRight, BookOpen, ChartNoAxesColumn, CheckCircle2, ChevronDown,
-  ChevronRight, CircleHelp, Compass, Crosshair, Database, Flag, LayoutDashboard, LibraryBig, ListFilter, MapPin, Route as RouteIcon,
-  Search, Settings2, SlidersHorizontal, X,
+  ChevronRight, CircleHelp, Compass, Crosshair, Database, Flag, Layers3, LayoutDashboard, LibraryBig, ListFilter, MapPin, Route as RouteIcon,
+  Search, Settings2, SlidersHorizontal, UserRound, X,
 } from 'lucide-react'
 import { chapters } from './data/chapters'
 import {
@@ -18,9 +18,12 @@ import { ProgressBar, Ring, TypeIcon } from './components/visuals'
 import { Settings } from './components/Settings'
 import { DatabaseBoundary } from './components/DatabaseBoundary'
 import banner from './assets/cunning-hares.webp'
-import { databaseTitle, dbPath } from './database/navigation'
+import { databaseSections, databaseTitle, dbPath } from './database/navigation'
+import { useCollection } from './database/collection'
+import type { Collection } from './database/collection'
 
 const DatabaseApp = lazy(() => import('./database/DatabaseApp'))
+const CollectionPage = lazy(() => import('./database/CollectionPage'))
 
 const bannerSource = 'https://www.hoyolab.com/article/29770110'
 const navItems = [
@@ -28,9 +31,10 @@ const navItems = [
   { path: '/timeline', label: 'Timeline', icon: RouteIcon },
   { path: '/library', label: 'Content Library', icon: LibraryBig },
   { path: '/database', label: 'Database', icon: Database },
-  { path: '/stats', label: 'Statistics', icon: ChartNoAxesColumn },
+  { path: '/profile', label: 'Profile', icon: UserRound },
 ]
-const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/stats': 'Statistics', '/settings': 'Settings' }
+const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/profile': 'Profile', '/profile/collection': 'Profile', '/settings': 'Settings' }
+const databaseShortcuts = databaseSections.filter(({ key }) => ['agents', 'engines', 'tiers', 'teams', 'banners'].includes(key))
 const versions = [...new Set(entries.flatMap((entry) => entry.releaseVersion ? [entry.releaseVersion] : []))]
   .sort((first, second) => first.localeCompare(second, undefined, { numeric: true })).reverse()
 const roots = entries.filter((entry) => !entry.parentID)
@@ -67,6 +71,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate()
   const [globalSearch, setGlobalSearch] = useState('')
   const inDatabase = pathname === '/database' || pathname.startsWith('/database/')
+  const searchDatabase = inDatabase || pathname === '/profile/collection'
+  const breadcrumb = inDatabase ? 'Game Database' : ['/dashboard', '/profile', '/profile/collection', '/settings'].includes(pathname) ? 'Zenlessentials' : 'Story Archive'
   const title = inDatabase ? databaseTitle(pathname) : views[pathname] ?? 'Page unavailable'
   useEffect(() => {
     document.title = title + ' — Zenlessentials'
@@ -90,15 +96,15 @@ function Shell({ children }: { children: React.ReactNode }) {
     </aside>
     <div className="workspace">
       <header className="topbar">
-        <div className="breadcrumb"><Compass size={15} /><span>{inDatabase ? 'Game Database' : 'Story Archive'}</span><ChevronRight size={13} /><strong>{title}</strong></div>
+        <div className="breadcrumb"><Compass size={15} /><span>{breadcrumb}</span><ChevronRight size={13} /><strong>{title}</strong></div>
         <form className="top-search" role="search" onSubmit={(event) => {
           event.preventDefault()
           if (!globalSearch.trim()) return
-          navigate((inDatabase ? '/database/search' : '/library') + '?q=' + encodeURIComponent(globalSearch.trim()))
+          navigate((searchDatabase ? '/database/search' : '/library') + '?q=' + encodeURIComponent(globalSearch.trim()))
           setGlobalSearch('')
         }}>
           <Search size={16} />
-          <input aria-label={inDatabase ? 'Search the game database' : 'Search the content library'} placeholder={inDatabase ? 'Search database…' : 'Search archive…'} value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />
+          <input aria-label={searchDatabase ? 'Search the game database' : 'Search the content library'} placeholder={searchDatabase ? 'Search database…' : 'Search archive…'} value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />
           <button type="submit" title="Search"><ArrowRight size={15} aria-label="Search" /></button>
         </form>
       </header>
@@ -143,7 +149,7 @@ function UpNext({ next, tracker }: { next: NarrativeEntry | undefined; tracker: 
 function Overview({ tracker }: { tracker: Tracker }) {
   const total = totals(entries, tracker.progress)
   return <section className="panel overview">
-    <div className="panel-heading"><h2>Story Progress</h2><Link to="/stats" className="icon-button" aria-label="View statistics"><ArrowUpRight size={17} /></Link></div>
+    <div className="panel-heading"><h2>Story Progress</h2><Link to="/profile" className="icon-button" aria-label="View story progress in Profile"><ArrowUpRight size={17} /></Link></div>
     <div className="overview-total"><Ring percent={total.percent} /><div><strong>{total.done}<span> / {total.total}</span></strong><small>entries completed</small></div></div>
     <div className="mini-stats">
       {([
@@ -161,7 +167,7 @@ function Overview({ tracker }: { tracker: Tracker }) {
 function SideRail({ tracker, next }: { tracker: Tracker; next: NarrativeEntry | undefined }) {
   const stat = totals(entries, tracker.progress)
   return <aside className="right-rail" aria-label="Timeline progress">
-    <Link className="mobile-progress" to="/stats" aria-label={'Story progress, ' + stat.percent + '% complete. View statistics.'}>
+    <Link className="mobile-progress" to="/profile" aria-label={'Story progress, ' + stat.percent + '% complete. View Profile.'}>
       <span>Story progress</span><ProgressBar percent={stat.percent} /><strong>{stat.percent}%</strong>
     </Link>
     <Overview tracker={tracker} />
@@ -364,11 +370,28 @@ function SeasonBreakdown({ tracker }: { tracker: Tracker }) {
   </section>
 }
 
-function Statistics({ tracker }: { tracker: Tracker }) {
+function Profile({ tracker, collection }: { tracker: Tracker; collection: Collection }) {
+  const { done, total } = totals(entries, tracker.progress)
+  const owned = Object.keys(collection.agents).length
+  const squads = collection.teams.length
+  return <>
+    <PageHeading title="Profile" subtitle="Your story progress, collection, and saved squads." />
+    <nav className="profile-nav" aria-label="Profile sections">
+      <NavLink to="/profile" end className="panel profile-tab">
+        <BookOpen size={22} aria-hidden="true" /><span><strong>Story Progress</strong><small>{done}/{total} completed</small></span><ChevronRight size={16} aria-hidden="true" />
+      </NavLink>
+      <NavLink to="/profile/collection" className="panel profile-tab">
+        <Layers3 size={22} aria-hidden="true" /><span><strong>Collection</strong><small>{owned} {owned === 1 ? 'Agent' : 'Agents'} · {squads} {squads === 1 ? 'squad' : 'squads'}</small></span><ChevronRight size={16} aria-hidden="true" />
+      </NavLink>
+    </nav>
+    <Outlet />
+  </>
+}
+
+function StoryStatistics({ tracker }: { tracker: Tracker }) {
   const progressTotals = totals(entries, tracker.progress)
   const watched = entries.filter((entry) => !entry.childQuestIDs.length && tracker.progress[entry.id]?.method === 'watched').length
   return <>
-    <PageHeading title="Statistics" subtitle="See how much of the story you’ve covered." />
     <div className="metric-grid">
       <section className="panel metric"><Ring percent={progressTotals.percent} size={78} /><div><strong>{progressTotals.done}/{progressTotals.total}</strong><span>Total complete</span></div></section>
       <section className="panel metric"><span className="metric-icon"><CheckCircle2 /></span><div><strong>{progressTotals.done - watched}</strong><span>Played</span></div></section>
@@ -394,9 +417,22 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
     .slice(0, 5)
   const currentChapter = next && chapters.find((chapter) => chapter.id === next.chapter)
   return <>
-    <PageHeading title="Dashboard" subtitle="Your story progress and next stop." />
-    <div className="dashboard-grid"><Overview tracker={tracker} /><UpNext next={next} tracker={tracker} /></div>
+    <PageHeading title="Dashboard" subtitle="Pick up the story, look up an Agent, or build your next squad." />
     <div className="dashboard-grid">
+      <UpNext next={next} tracker={tracker} />
+      <section className="panel chart-panel" aria-labelledby="dashboard-database-title">
+        <div className="dashboard-database-heading">
+          <h2 id="dashboard-database-title"><Database size={18} /> Game Database</h2>
+          <Link to={dbPath()} className="secondary-button">Open Database <ArrowRight size={15} /></Link>
+        </div>
+        <div className="dashboard-shortcuts">
+          {databaseShortcuts.map(({ key, title, icon: Icon }) => <Link key={key} to={dbPath(key)}><Icon size={17} aria-hidden="true" />{title}</Link>)}
+          <Link to="/profile/collection"><Layers3 size={17} aria-hidden="true" />My Collection</Link>
+        </div>
+      </section>
+    </div>
+    <div className="dashboard-grid">
+      <Overview tracker={tracker} />
       <SeasonBreakdown tracker={tracker} />
       <section className="panel chart-panel">
         <h2><BookOpen size={18} /> Current position</h2>
@@ -412,6 +448,7 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
 
 export default function App() {
   const tracker = useTracker()
+  const collection = useCollection()
   const next = recommend(tracker)
 
   useLayoutEffect(() => {
@@ -423,6 +460,7 @@ export default function App() {
 
   return <Shell>
     {tracker.storageError && <p className="storage-message" role="alert">Browser storage is unavailable. Export a backup before leaving this page.</p>}
+    {collection.storageError && <p className="storage-message" role="alert">Your browser could not save your collection. <Link to="/profile/collection">Export a collection backup</Link> before leaving.</p>}
     <Routes>
       <Route path="/" element={<Timeline tracker={tracker} next={next} />} />
       <Route path="/timeline" element={<Timeline tracker={tracker} next={next} />} />
@@ -430,8 +468,13 @@ export default function App() {
       <Route path="/library" element={<Library key="all" tracker={tracker} />} />
       <Route path="/agents" element={<Library key="agents" tracker={tracker} mode="agents" />} />
       <Route path="/events" element={<Library key="events" tracker={tracker} mode="events" />} />
-      <Route path={dbPath() + '/*'} element={<DatabaseBoundary><Suspense fallback={<p role="status">Loading database…</p>}><DatabaseApp /></Suspense></DatabaseBoundary>} />
-      <Route path="/stats" element={<Statistics tracker={tracker} />} />
+      <Route path="/database/collection" element={<Navigate to="/profile/collection" replace />} />
+      <Route path={dbPath() + '/*'} element={<DatabaseBoundary><Suspense fallback={<p role="status">Loading database…</p>}><DatabaseApp state={collection} /></Suspense></DatabaseBoundary>} />
+      <Route path="/profile" element={<Profile tracker={tracker} collection={collection.collection} />}>
+        <Route index element={<StoryStatistics tracker={tracker} />} />
+        <Route path="collection" element={<DatabaseBoundary collection><Suspense fallback={<p role="status">Loading collection…</p>}><CollectionPage state={collection} /></Suspense></DatabaseBoundary>} />
+      </Route>
+      <Route path="/stats" element={<Navigate to="/profile" replace />} />
       <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />
     </Routes>

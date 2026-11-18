@@ -1,4 +1,4 @@
-import { AudioLines, BookOpen, CalendarDays, CircleDot, Disc3, Flag, Layers3, ScanSearch, Swords, UsersRound } from 'lucide-react'
+import { AudioLines, BookOpen, CalendarDays, CircleDot, Disc3, Flag, ScanSearch, Swords, UsersRound } from 'lucide-react'
 
 export const databaseSections = [
   { key: 'agents', title: 'Agents', icon: UsersRound, description: 'Stats, skills, builds and story appearances' },
@@ -9,7 +9,6 @@ export const databaseSections = [
   { key: 'teams', title: 'Team Builder', icon: Swords, description: 'Assemble squads and check their passives' },
   { key: 'banners', title: 'Banners', icon: CalendarDays, description: 'Signal Search schedules and reruns' },
   { key: 'guides', title: 'Guides', icon: BookOpen, description: 'Combat, gearing and progression' },
-  { key: 'collection', title: 'Collection', icon: Layers3, description: 'Your roster, favorites and wishlist' },
 ] as const
 export const databaseSearch = { key: 'search', title: 'Database Search', icon: ScanSearch }
 export const dbPath = (section = '', id = '') => '/database' + (section ? '/' + section : '') + (id ? '/' + id : '')

@@ -281,6 +281,21 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
 .empty svg { color: var(--accent); }
 .empty p { color: var(--muted); font-size: 13px; margin: 0 0 5px; }
 .dashboard-grid, .settings-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; align-items: start; }
+.dashboard-database-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.dashboard-database-heading h2 { margin: 0; }
+.dashboard-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.dashboard-shortcuts a { display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 7px 9px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-inset); font-size: 12px; font-weight: 700; }
+.dashboard-shortcuts svg { color: var(--accent); flex: none; }
+.dashboard-shortcuts a:hover { border-color: var(--accent-border); background: var(--accent-soft); }
+.profile-nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-bottom: 12px; }
+.profile-tab { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 68px; padding: 10px 12px; }
+.profile-tab span { display: grid; gap: 3px; }
+.profile-tab strong { font-size: 14px; }
+.profile-tab small { color: var(--muted); font-size: 12px; }
+.profile-tab svg:first-child { color: var(--accent); }
+.profile-tab svg:last-child { color: var(--muted); }
+.profile-tab:hover, .profile-tab[aria-current="page"] { border-color: var(--accent-border); background: var(--accent-soft); }
+.profile-tab[aria-current="page"] strong { color: var(--accent); }
 .metric-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 12px; }
 .metric { display: flex; gap: 11px; align-items: center; min-height: 100px; padding: 10px; }
 .metric div:last-child { display: grid; }
@@ -319,6 +334,7 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
 .site-footer small { flex-basis: 100%; font-size: inherit; }
 .site-footer a:hover { color: var(--accent); }
 .storage-message { border: 1px solid #78684d; background: #2c251b; padding: 9px; border-radius: 7px; margin-bottom: 12px; }
+.storage-message a { text-decoration: underline; }
 
 @media (max-width: 1160px) {
   .shell { grid-template-columns: 190px minmax(0, 1fr); }
@@ -378,6 +394,10 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
   .checkbox { width: 44px; height: 44px; }
   .story-row .details-toggle { width: 40px; height: 44px; }
   .library-results, .dashboard-grid, .settings-layout { grid-template-columns: 1fr; }
+  .dashboard-shortcuts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .profile-nav { gap: 6px; }
+  .profile-tab { grid-template-columns: auto minmax(0, 1fr); gap: 7px; padding: 8px; }
+  .profile-tab svg:last-child { display: none; }
   .metric-grid { gap: 5px; }
   .metric { align-items: flex-start; flex-direction: column; min-height: 114px; gap: 5px; }
   .metric .progress-ring { width: 50px !important; height: 50px !important; }

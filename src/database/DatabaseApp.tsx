@@ -2,8 +2,6 @@ import { Route, Routes, useLocation, useParams } from 'react-router-dom'
 import { AgentPage } from './AgentPage'
 import { BannerBook } from './Banners'
 import { Catalog, DatabaseHub, DatabaseSearch } from './Catalog'
-import { CollectionPage } from './CollectionPage'
-import { useCollection } from './collection'
 import type { CollectionState } from './collection'
 import { BangbooPage, DiscPage, EngineCompare, EnginePage, Guides } from './Equipment'
 import { TeamBuilder } from './Teams'
@@ -24,12 +22,10 @@ function Detail({ section,state }: { section: 'agents'|'engines'|'discs'|'bangbo
   }
 }
 
-export default function DatabaseApp() {
-  const state = useCollection()
+export default function DatabaseApp({ state }: { state: CollectionState }) {
   const {search} = useLocation()
   return <div className="db">
     <DatabaseNav />
-    {state.storageError && <p className="storage-message" role="alert">Your browser could not save this collection. Export it before leaving.</p>}
     <Routes>
       <Route index element={<DatabaseHub />} />
       <Route path="search" element={<DatabaseSearch />} />
@@ -49,7 +45,6 @@ export default function DatabaseApp() {
       <Route path="banners/:id" element={<Detail section="banners" state={state} />} />
       <Route path="guides" element={<Guides />} />
       <Route path="guides/:id" element={<Detail section="guides" state={state} />} />
-      <Route path="collection" element={<CollectionPage state={state} />} />
       <Route path="*" element={<Empty>This database page is unavailable.</Empty>} />
     </Routes>
   </div>

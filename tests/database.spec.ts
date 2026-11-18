@@ -78,6 +78,10 @@ test('shares team relationships and persists the collection and personal ranking
   await page.getByRole('button', { name: 'Move Phoenix' }).click()
   await page.getByRole('region', { name: 'Move Phoenix into a tier' }).getByRole('button', { name: 'T0', exact: true }).click()
   await page.goto('/database/collection')
+  await expect(page).toHaveURL('/profile/collection')
+  await expect(page.getByRole('heading', { name: 'Profile', level: 1 })).toBeVisible()
+  const profileTabs = page.getByRole('navigation', { name: 'Profile sections' })
+  await expect(profileTabs.getByRole('link', { name: /Collection.*1 Agent.*1 squad/ })).toHaveAttribute('aria-current', 'page')
   await expect(page.getByRole('combobox',{name:'Mindscape',exact:true})).toHaveValue('2')
   const file = page.waitForEvent('download')
   await page.getByRole('button',{name:'Export collection'}).click()
@@ -89,13 +93,41 @@ test('shares team relationships and persists the collection and personal ranking
   await page.getByRole('button',{name:'Remove',exact:true}).click()
   await page.getByRole('button',{name:'Confirm removal'}).click()
   await expect(page.getByRole('heading',{name:'My Vortex squad',exact:true})).toHaveCount(0)
+  await expect(profileTabs.getByRole('link', { name: /Collection.*1 Agent.*0 squads/ })).toBeVisible()
+  await page.getByRole('link', { name: 'My Tier List', exact: true }).click()
+  await expect(page.getByRole('button', { name: 'My tier list' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('[data-tier="T0"]').getByRole('button', { name: 'Move Phoenix' })).toBeVisible()
+})
+
+test('links the Dashboard, database and both Profile sections', async ({ page }) => {
+  await page.goto('/timeline')
+  await page.getByRole('checkbox', { name: 'Complete Business x Strangeness x Justness' }).check()
+  const mainNav = page.getByRole('navigation', { name: 'Main navigation' })
+  await mainNav.getByRole('link', { name: 'Dashboard' }).click()
+  const shortcuts = page.getByRole('region', { name: 'Game Database' })
+  await expect(shortcuts.getByRole('link', { name: 'Team Builder' })).toHaveAttribute('href', '/database/teams')
+  await expect(shortcuts.getByRole('link', { name: 'My Collection' })).toHaveAttribute('href', '/profile/collection')
+  await shortcuts.getByRole('link', { name: 'Open Database' }).click()
+  await expect(page.getByRole('navigation', { name: 'Database sections' }).getByRole('link', { name: 'Collection' })).toHaveCount(0)
+  await page.getByRole('link', { name: /My Collection/ }).click()
+  await expect(mainNav.getByRole('link', { name: 'Profile' })).toHaveAttribute('aria-current', 'page')
+  await expect(page.getByRole('heading', { name: 'Your Collection' })).toBeVisible()
+  const profileSections = page.getByRole('navigation', { name: 'Profile sections' })
+  await profileSections.getByRole('link', { name: /Story Progress.*1\// }).click()
+  await expect(page.getByRole('heading', { name: 'Progress by season' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Progress by category' })).toBeVisible()
+  await expect(profileSections.getByRole('link', { name: /Story Progress/ })).toHaveAttribute('aria-current', 'page')
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
+  await profileSections.getByRole('link', { name: /Collection/ }).click()
+  await page.getByRole('link', { name: 'Browse Agents', exact: true }).click()
+  await expect(page).toHaveURL('/database/agents')
 })
 
 test('every primary database route works on direct navigation and stays inside the viewport', async ({ page }) => {
   const pages = [
     ['database','GAME DATABASE'],['database/bangboo','Bangboo'],['database/bangboo/boo-54023','Ariel'],
     ['database/discs','Drive Discs'],['database/discs/disc-32700','Branch & Blade Song'],['database/teams','Team Builder'],
-    ['database/tiers','Tier List'],['database/guides','Guides'],['database/collection','Your Collection'],
+    ['database/tiers','Tier List'],['database/guides','Guides'],['profile/collection','Profile'],
   ]
   for (const [route,heading] of pages) {
     const response = await page.goto('/' + route)
@@ -109,17 +141,23 @@ test('every primary database route works on direct navigation and stays inside t
   await expect(page.getByRole('link',{name:'Miyabi',exact:true})).toBeVisible()
 })
 
-test('keeps the story usable offline and caches an Agent profile after a visit', async ({ page, context }) => {
+test('keeps the story usable offline and caches visited Agent profiles and collection', async ({ page, context }) => {
   await page.goto('/timeline')
   await page.waitForFunction(() => Boolean(navigator.serviceWorker.controller))
   await page.goto('/database/agents/agent-1641')
   await expect(page.getByRole('heading',{name:'Base statistics'})).toBeVisible()
+  await page.getByRole('button', { name: 'Mark owned' }).click()
+  await page.goto('/profile/collection')
+  await expect(page.getByRole('link', { name: 'Phoenix', exact: true })).toBeVisible()
   await page.waitForFunction(async () => {
     const cache = await caches.open('database-chunks-v1')
-    return (await cache.keys()).some((request) => /agent-1641-.*\.js$/.test(new URL(request.url).pathname))
+    const paths = (await cache.keys()).map((request) => new URL(request.url).pathname)
+    return ['/assets/agent-1641-', '/assets/CollectionPage-'].every((prefix) => paths.some((path) => path.startsWith(prefix)))
   })
   await context.setOffline(true)
   await page.reload()
+  await expect(page.getByRole('link', { name: 'Phoenix', exact: true })).toBeVisible()
+  await page.getByRole('link', { name: 'Phoenix', exact: true }).click()
   await expect(page.getByRole('heading',{name:'Phoenix',exact:true})).toBeVisible()
   await expect(page.getByRole('heading',{name:'Base statistics'})).toBeVisible()
   await page.goto('/timeline')

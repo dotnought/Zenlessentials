@@ -34,9 +34,9 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{html,js,css,woff,woff2,webp,svg,png,webmanifest}'],
-        globIgnores: ['database-art/**', '**/agent-*.js', '**/DatabaseApp-*', '**/db-*.js'],
+        globIgnores: ['database-art/**', '**/agent-*.js', '**/DatabaseApp-*', '**/CollectionPage-*', '**/database-*', '**/db-*.js'],
         runtimeCaching: [{
-          urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/assets\/(?:DatabaseApp-|db-|agent-)/.test(url.pathname),
+          urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/assets\/(?:DatabaseApp-|CollectionPage-|database-|db-|agent-)/.test(url.pathname),
           handler: 'CacheFirst',
           options: { cacheName: 'database-chunks-v1', expiration: { maxEntries: 90, maxAgeSeconds: 60 * 60 * 24 * 14 } },
         }, {

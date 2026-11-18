@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Search } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, Check, ChevronLeft, ChevronRight, Layers3, Search } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { agents, bangboo, catalog, discs, engines, observations, statByID } from './data'
 import type { CollectionState } from './collection'
@@ -37,6 +37,9 @@ export function DatabaseHub() {
       {databaseSections.map(({ key, title, description, icon: Icon }) => <Link className="panel db-category" key={key} to={dbPath(key)}>
         <span className="db-category-icon"><Icon size={21} /></span><div><strong>{title}</strong><p>{description}</p></div><ArrowUpRight size={15} />
       </Link>)}
+      <Link className="panel db-category" to="/profile/collection">
+        <span className="db-category-icon"><Layers3 size={21} /></span><div><strong>My Collection</strong><p>View your roster, wishlist and saved squads in Profile</p></div><ArrowUpRight size={15} />
+      </Link>
     </div>
     <p className="db-muted db-coverage">Game data checked {catalog.checked}. <a href="https://github.com/dotnought/Zenlessentials/blob/main/DATABASE_SOURCES.md" target="_blank" rel="noreferrer">Sources and coverage <ArrowUpRight size={13} /></a></p>
   </>

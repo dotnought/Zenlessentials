@@ -1,12 +1,15 @@
 import { useRef, useState } from 'react'
-import { Download, Upload } from 'lucide-react'
+import { ArrowUpRight, Download, Upload } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { agentByID, bangbooByID, engineByID } from './data'
 import { parseCollection, serializeCollection } from './collection'
 import type { CollectionState } from './collection'
+import { dbPath } from './navigation'
 import { SavedSquads } from './Teams'
-import { DBHeading, DBPanel, Ownership, RecordLink } from './ui'
+import { DBPanel, Ownership, RecordLink } from './ui'
+import './database.css'
 
-export function CollectionPage({ state }: { state: CollectionState }) {
+export default function CollectionPage({ state }: { state: CollectionState }) {
   const input = useRef<HTMLInputElement>(null)
   const [message,setMessage] = useState('')
   const [pendingImport,setPendingImport] = useState<ReturnType<typeof parseCollection>>()
@@ -37,8 +40,14 @@ export function CollectionPage({ state }: { state: CollectionState }) {
       setMessage(error instanceof SyntaxError ? 'That file is invalid JSON.' : error instanceof Error ? error.message : 'Could not read the backup.')
     }
   }
-  return <>
-    <DBHeading title="Your Collection" description="Track owned gear, Agent Mindscapes, favorites and saved squads on this device." />
+  return <div className="db profile-collection">
+    <div className="profile-collection-heading">
+      <h2>Your Collection</h2>
+      <div className="db-actions">
+        <Link className="secondary-button" to={dbPath('teams')}>Team Builder <ArrowUpRight size={14} /></Link>
+        <Link className="secondary-button" to={dbPath('tiers') + '?view=personal'}>My Tier List <ArrowUpRight size={14} /></Link>
+      </div>
+    </div>
     <div className="db-count-strip db-collection-counts">{groups.map((group) => <div key={group.kind}>
       <strong>{Object.keys(collection[group.kind]).filter((id) => group.ids.has(id)).length}</strong><span>Owned {group.title}</span>
     </div>)}</div>
@@ -48,7 +57,7 @@ export function CollectionPage({ state }: { state: CollectionState }) {
         return record ? [<div className="db-collection-card" key={id}><RecordLink route={kind} record={record} />
           <Ownership state={state} kind={kind} id={id} /></div>] : []
       })}</div>
-      {Object.keys(collection[kind]).length === 0 && <p className="db-muted">Mark entries owned on their database profiles.</p>}
+      {!Object.keys(collection[kind]).some((id) => ids.has(id)) && <Link className="secondary-button" to={dbPath(kind)}>Browse {title} <ArrowUpRight size={14} /></Link>}
     </DBPanel>)}
     <div className="db-two-columns">
       <DBPanel title="Favorite Agents">
@@ -68,7 +77,7 @@ export function CollectionPage({ state }: { state: CollectionState }) {
       </DBPanel>
     </div>
     <SavedSquads state={state} />
-    <DBPanel title="Collection backup" note="Use this backup to move your collection, saved squads and personal tiers to another browser or Home Screen installation. Story progress has its own backup in Settings.">
+    <DBPanel title="Collection backup" note="Save your collection, squads, and personal tiers as a file you can import on another device.">
       <div className="db-actions">
         <button className="secondary-button" type="button" onClick={exportBackup}><Download size={16} /> Export collection</button>
         <button className="secondary-button" type="button" onClick={() => input.current?.click()}><Upload size={16} /> Import collection</button>
@@ -90,6 +99,7 @@ export function CollectionPage({ state }: { state: CollectionState }) {
         </div>
       </div>}
       {message && <p role="status">{message}</p>}
+      <Link className="profile-backup-link" to="/settings">Story progress backup in Settings <ArrowUpRight size={14} /></Link>
     </DBPanel>
-  </>
+  </div>
 }
