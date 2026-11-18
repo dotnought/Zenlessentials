@@ -1,8 +1,14 @@
+import rawDatabaseCatalog from '../src/database/data/catalog.json'
+import type { CatalogData } from '../src/database/model'
+import { bannerState, engineStats } from '../src/database/mechanics'
+import { emptyCollection, parseCollection, serializeCollection } from '../src/database/collection'
 import assert from 'node:assert/strict'
 import test from 'node:test'
 import { entries, entryByID } from '../src/data/timeline'
 import { getAvailability } from '../src/data/model'
 import { isComplete, mergeProgress, parseProgress, serializeProgress, totals } from '../src/progress'
+
+const databaseCatalog = rawDatabaseCatalog as CatalogData
 
 test('backup round trip keeps stable IDs, methods, and entries from future data versions', () => {
   const progress = {
@@ -44,4 +50,27 @@ test('limited availability rolls forward at the published deadline', () => {
   const event = entryByID['hobbling-trails']
   assert.equal(getAvailability(event, new Date('2026-11-18T12:00:00Z')), 'limited')
   assert.equal(getAvailability(event, new Date('2026-12-02T12:00:00Z')), 'expired')
+})
+
+test('W-Engine stats use the released curve and the exact Steel Cushion example', () => {
+  const steel = databaseCatalog.engines.find((engine) => engine.name === 'Steel Cushion')!
+  assert.deepEqual(engineStats(steel, databaseCatalog.engineCurves, 1, 0), {atk:46,secondary:960})
+  assert.deepEqual(engineStats(steel, databaseCatalog.engineCurves, 10, 0), {atk:118,secondary:960})
+  assert.deepEqual(engineStats(steel, databaseCatalog.engineCurves, 60, 5), {atk:684,secondary:2400})
+})
+
+test('regional banner state has a complete final minute', () => {
+  const banner = {starts:'2026-11-11T12:00',ends:'2026-12-01T14:59'}
+  assert.equal(bannerState(banner,new Date('2026-11-11T05:59Z'),'asia'),'Current')
+  assert.equal(bannerState(banner,new Date('2026-11-11T05:59Z'),'europe'),'Upcoming')
+  assert.equal(bannerState(banner,new Date('2026-12-01T06:59:58Z'),'asia'),'Current')
+  assert.equal(bannerState(banner,new Date('2026-12-01T07:00Z'),'asia'),'History')
+})
+
+test('collection backups preserve valid unknown IDs and reject duplicate team members', () => {
+  const store = { ...emptyCollection, agents:{'agent-9999':2}, planned:['engine-99999'] }
+  assert.deepEqual(parseCollection(serializeCollection(store)),store)
+  assert.throws(() => parseCollection(serializeCollection({
+    ...store,teams:[{id:'squad-duplicate',name:'Duplicate',agentIds:['agent-1011','agent-1011','agent-1011'],bangbooId:''}],
+  })),/Invalid saved squad/)
 })

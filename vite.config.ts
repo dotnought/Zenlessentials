@@ -4,6 +4,14 @@ import tailwind from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  build: {
+    rolldownOptions: {
+      output: {
+        codeSplitting: { groups: [{ name: 'db-catalog', test: /[\/]database[\/]data[\/]catalog\.json$/ },
+                                  { name: 'db-observations', test: /[\/]database[\/]data[\/]observations\.json$/ }] },
+      },
+    },
+  },
   plugins: [
     react(),
     tailwind(),
@@ -13,7 +21,7 @@ export default defineConfig({
         id: '/',
         name: 'Zenlessentials',
         short_name: 'Zenlessentials',
-        description: 'Track Zenless Zone Zero stories, Agents, and events.',
+        description: 'Track Zenless Zone Zero stories, look up Agents and equipment, and save squads.',
         start_url: '/',
         scope: '/',
         display: 'standalone',
@@ -26,6 +34,16 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{html,js,css,woff,woff2,webp,svg,png,webmanifest}'],
+        globIgnores: ['database-art/**', '**/agent-*.js', '**/DatabaseApp-*', '**/db-*.js'],
+        runtimeCaching: [{
+          urlPattern: ({ url, sameOrigin }) => sameOrigin && /^\/assets\/(?:DatabaseApp-|db-|agent-)/.test(url.pathname),
+          handler: 'CacheFirst',
+          options: { cacheName: 'database-chunks-v1', expiration: { maxEntries: 90, maxAgeSeconds: 60 * 60 * 24 * 14 } },
+        }, {
+          urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/database-art/'),
+          handler: 'StaleWhileRevalidate',
+          options: { cacheName: 'database-art-v1', expiration: { maxEntries: 240, maxAgeSeconds: 60 * 60 * 24 * 14, purgeOnQuotaError: true } },
+        }],
         navigateFallbackDenylist: [/\.[^/]+$/],
       },
     }),

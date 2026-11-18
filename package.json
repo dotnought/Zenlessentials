@@ -1,15 +1,17 @@
 {
   "name": "zenlessentials",
   "version": "1.0.0",
-  "description": "A sourced Zenless Zone Zero story and event tracker.",
+  "description": "A Zenless Zone Zero story tracker, game database, and team builder.",
   "scripts": {
     "dev": "vite",
     "check": "tsc --noEmit",
     "validate:data": "tsx scripts/validate-data.ts",
-    "build": "npm run check && npm run validate:data && vite build",
+    "build": "npm run check && npm run validate:data && npm run validate:database && vite build",
     "preview": "vite preview",
     "test": "tsx --test tests/unit.test.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "validate:database": "tsx scripts/database/validate.ts",
+    "update:database": "tsx scripts/database/link-stories.ts"
   },
   "repository": {
     "type": "git",

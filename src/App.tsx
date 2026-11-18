@@ -1,8 +1,8 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Activity, ArrowDown, ArrowRight, ArrowUpRight, BookOpen, ChartNoAxesColumn, CheckCircle2, ChevronDown,
-  ChevronRight, CircleHelp, Compass, Crosshair, Flag, LayoutDashboard, LibraryBig, ListFilter, MapPin, Route as RouteIcon,
+  ChevronRight, CircleHelp, Compass, Crosshair, Database, Flag, LayoutDashboard, LibraryBig, ListFilter, MapPin, Route as RouteIcon,
   Search, Settings2, SlidersHorizontal, X,
 } from 'lucide-react'
 import { chapters } from './data/chapters'
@@ -16,13 +16,18 @@ import type { Tracker } from './progress'
 import { StoryCard, storyLink } from './components/StoryCard'
 import { ProgressBar, Ring, TypeIcon } from './components/visuals'
 import { Settings } from './components/Settings'
+import { DatabaseBoundary } from './components/DatabaseBoundary'
 import banner from './assets/cunning-hares.webp'
+import { databaseTitle, dbPath } from './database/navigation'
+
+const DatabaseApp = lazy(() => import('./database/DatabaseApp'))
 
 const bannerSource = 'https://www.hoyolab.com/article/29770110'
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/timeline', label: 'Timeline', icon: RouteIcon },
   { path: '/library', label: 'Content Library', icon: LibraryBig },
+  { path: '/database', label: 'Database', icon: Database },
   { path: '/stats', label: 'Statistics', icon: ChartNoAxesColumn },
 ]
 const views: Record<string, string> = { '/': 'Timeline', '/timeline': 'Timeline', '/dashboard': 'Dashboard', '/library': 'Content Library', '/agents': 'Agent Stories', '/events': 'Events', '/stats': 'Statistics', '/settings': 'Settings' }
@@ -53,7 +58,7 @@ function Brand() {
       <rect x="2" y="2" width="44" height="44" rx="12" />
       <path d="M15 13h22l-2 4-15 14h12l-2 4H10l2-5 15-13H13z" />
     </svg>
-    <span>Zenlessentials<small>STORY TRACKER</small></span>
+    <span>Zenlessentials<small>ZZZ COMPANION</small></span>
   </Link>
 }
 
@@ -61,7 +66,8 @@ function Shell({ children }: { children: React.ReactNode }) {
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
   const [globalSearch, setGlobalSearch] = useState('')
-  const title = views[pathname] ?? 'Page unavailable'
+  const inDatabase = pathname === '/database' || pathname.startsWith('/database/')
+  const title = inDatabase ? databaseTitle(pathname) : views[pathname] ?? 'Page unavailable'
   useEffect(() => {
     document.title = title + ' — Zenlessentials'
     if (!hash) window.scrollTo({ top: 0, behavior: 'instant' })
@@ -84,15 +90,15 @@ function Shell({ children }: { children: React.ReactNode }) {
     </aside>
     <div className="workspace">
       <header className="topbar">
-        <div className="breadcrumb"><Compass size={15} /><span>Story Archive</span><ChevronRight size={13} /><strong>{title}</strong></div>
+        <div className="breadcrumb"><Compass size={15} /><span>{inDatabase ? 'Game Database' : 'Story Archive'}</span><ChevronRight size={13} /><strong>{title}</strong></div>
         <form className="top-search" role="search" onSubmit={(event) => {
           event.preventDefault()
           if (!globalSearch.trim()) return
-          navigate('/library?q=' + encodeURIComponent(globalSearch.trim()))
+          navigate((inDatabase ? '/database/search' : '/library') + '?q=' + encodeURIComponent(globalSearch.trim()))
           setGlobalSearch('')
         }}>
           <Search size={16} />
-          <input aria-label="Search the content library" placeholder="Search archive…" value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />
+          <input aria-label={inDatabase ? 'Search the game database' : 'Search the content library'} placeholder={inDatabase ? 'Search database…' : 'Search archive…'} value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} />
           <button type="submit" title="Search"><ArrowRight size={15} aria-label="Search" /></button>
         </form>
       </header>
@@ -424,6 +430,7 @@ export default function App() {
       <Route path="/library" element={<Library key="all" tracker={tracker} />} />
       <Route path="/agents" element={<Library key="agents" tracker={tracker} mode="agents" />} />
       <Route path="/events" element={<Library key="events" tracker={tracker} mode="events" />} />
+      <Route path={dbPath() + '/*'} element={<DatabaseBoundary><Suspense fallback={<p role="status">Loading database…</p>}><DatabaseApp /></Suspense></DatabaseBoundary>} />
       <Route path="/stats" element={<Statistics tracker={tracker} />} />
       <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />

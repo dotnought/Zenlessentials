@@ -1,0 +1,131 @@
+import type { EditorialBuild, Guide, RecommendedTeam } from './model'
+
+const release = 'https://zenless.hoyoverse.com/en-us/news/166963'
+const enka = 'https://github.com/EnkaNetwork/API-docs/blob/master/docs/zzz/api.md'
+const agentReference = (slug: string) => 'https://www.prydwen.gg/zenless/characters/' + slug
+
+export const builds: EditorialBuild[] = [
+  {
+    id: 'miyabi-frost', agentId: 'agent-1091', version: '3.3',
+    summary: 'A Frost burst carry. She converts CRIT Rate into faster Frost buildup, then spends Fallen Frost on charged attacks.',
+    strengths: ['Wide area coverage on charged slashes', 'Disorder teammates can help refill Fallen Frost', 'Frost application can coexist with regular Ice application'],
+    tradeoffs: ['Her signature supplies a large share of her CRIT budget', 'Stack generation determines how often she can use a fully charged attack'],
+    rotation: ['Apply a different anomaly with the second Agent to help set up Disorder.', 'Build Fallen Frost and use her EX Special when it helps reach a full charge.', 'Spend six Fallen Frost on Shimotsuki when enemy positioning and buffs line up.'],
+    engines: [{id:'engine-14109',note:'Signature. CRIT Rate helps Frost buildup and the passive rewards applying Anomaly.'},
+      {id:'engine-13008',note:'Craftable alternative. Gains Anomaly Proficiency as the squad applies anomalies.'}],
+    discs: [{id:'disc-32700',note:'4-piece. Freeze and Shatter can trigger its CRIT Rate effect.'}, {id:'disc-31000',note:'2-piece. Straightforward CRIT Rate when the build needs it.'}],
+    main: ['CRIT Rate or ATK%', 'Ice DMG or ATK%', 'ATK%'], substats: ['CRIT Rate', 'CRIT DMG', 'ATK%', 'Anomaly Proficiency'],
+    targets: ['80% CRIT Rate caps the Frost buildup conversion. Count active set bonuses separately.'], sources:[agentReference('miyabi')],
+  },
+  {
+    id:'phoenix-vortex',agentId:'agent-1641',version:'3.3',
+    summary:'A Fire Anomaly driver who lets the squad’s eligible Anomaly damage crit against targets with Sear.',
+    strengths:['Vortex, Abloom and Luminize can benefit from Sear','Pairs with other Anomaly Agents to unlock her Additional Ability'],
+    tradeoffs:['Standard Disorder does not receive the Sear crit effect','Anomaly Mastery matters more than a conventional CRIT build'],
+    rotation:['Have a squad member apply Anomaly to establish Sear.', 'Use EX Special to enter Wither and Bloom and Combustion attacks to gain Pyre.',
+      'Hold Basic Attack after reaching 90 Pyre to spend it on Purifying Flame. Time the finisher for the anomaly you want to trigger.'],
+    engines:[{id:'engine-14164',note:'Signature. Anomaly Mastery helps the Sear threshold and the passive rewards Anomaly critical hits.'},
+      {id:'engine-13003',note:'Craftable. Anomaly Proficiency helps her personal damage, with a weaker Sear Mastery budget.'}],
+    discs:[{id:'disc-31300',note:'4-piece. Reduces Anomaly Buildup RES for her attribute after an EX Special hit.'},
+      {id:'disc-33000',note:'2-piece. Helps reach her initial Anomaly Mastery threshold.'}],
+    main:['Anomaly Proficiency','Fire DMG or PEN Ratio','Anomaly Mastery'],substats:['Anomaly Proficiency','ATK%','PEN','ATK'],
+    targets:['255 initial Anomaly Mastery caps Sear’s Anomaly CRIT Rate.'],
+    sources:[release,agentReference('phoenix')],
+  },
+  {
+    id:'severian-wind',agentId:'agent-1631',version:'3.3',
+    summary:'A Wind burst attacker. His counters and follow-up strikes feed Flow, which he spends on enhanced Basics.',
+    strengths:['Rewards counter opportunities during on-field time','Another Wind Agent unlocks an additional part of his Core Passive'],
+    tradeoffs:['Needs substantial CRIT Rate to get the full ATK conversion','Long attack strings need room inside the stun window'],
+    rotation:['Build Flow through counter sequences before the enemy is stunned.', 'Apply team buffs and Windswept where possible before the burst.',
+      'Spend Flow on enhanced Basics. Plan the Ultimate around the time left in the stun rather than forcing a fixed sequence.'],
+    engines:[{id:'engine-14163',note:'Signature. CRIT Rate advances the Additional Ability and Basic hits activate its ATK and Wind RES effects.'},
+      {id:'engine-14146',note:'Seed’s signature offers CRIT Rate and Basic and Ultimate DEF ignore when its conditions are met.'},
+      {id:'engine-14155',note:'Free Interboo reward. Its CRIT support works well if the signature is unavailable.'},
+      {id:'engine-13004',note:'Craftable alternative. Plan a Quick Assist or Dodge Counter to activate its ATK effect.'}],
+    discs:[{id:'disc-33300',note:'4-piece. Use an EX Special to set up its Basic Attack bonus before spending Flow.'},
+      {id:'disc-31000',note:'2-piece. Helps close the CRIT Rate gap.'},{id:'disc-31100',note:'2-piece alternative in PEN-oriented builds.'}],
+    main:['CRIT Rate','PEN Ratio, Wind DMG or ATK%','ATK%'],substats:['CRIT Rate','CRIT DMG','ATK%','PEN'],
+    targets:['100% in-combat CRIT Rate caps the Additional Ability conversion. Include temporary and gear bonuses.'],
+    comparison:{context:'Prydwen’s Version 3.3 team simulation uses Norma with Chief Sidekick and Sunna with Thoughtbop. Incarcerating Grip at Overclock 1 is 100%. All listed alternatives are Overclock 1. The result is specific to that setup.',baseline:'engine-14163',
+      values:[{engineId:'engine-14163',percent:100},{engineId:'engine-14146',percent:88.51},{engineId:'engine-14155',percent:82.52}],source:agentReference('severian')},
+    sources:[release,agentReference('severian')],
+  },
+  {
+    id:'nicole-support',agentId:'agent-1031',version:'3.3',
+    summary:'Bring Nicole for short field time, grouping and DEF reduction. Set up the damage window just before swapping to the carry.',
+    strengths:['Grouping helps when smaller enemies can be pulled','DEF reduction works with allies of any attribute'],
+    tradeoffs:['Her debuff is brief, so apply it close to the carry’s burst'],
+    rotation:['Use EX Special to place her energy field on the largest target group.', 'Swap into the carry while the field is still applying DEF reduction.',
+      'Use Chain Attack to refresh the setup during a stun where available.'],
+    engines:[{id:'engine-13103',note:'Signature. Her Ether energy field can trigger the team damage buff.'}],
+    discs:[{id:'disc-31600',note:'4-piece. A Chain Attack or Ultimate sets up a squad damage buff.'},
+      {id:'disc-33400',note:'2-piece. Energy Regen helps cast her EX Special more often.'}],
+    main:['CRIT Rate or Anomaly Proficiency','Ether DMG or ATK%','Energy Regen'],
+    substats:['Anomaly Proficiency or CRIT','ATK%'],sources:[agentReference('nicole-demara')],
+  },
+  {
+    id:'anby-stun',agentId:'agent-1011',version:'3.3',
+    summary:'A readily available on-field Stunner who builds Daze with Electric finishers and defensive assists.',
+    strengths:['Straightforward stun setup without limited equipment','Can advance Daze quickly with her proper basic-to-special sequence'],
+    tradeoffs:['Needs field time to run her basic sequence','Taking a forced dodge can interrupt the sequence'],
+    rotation:['Start with three basic hits.', 'Use Thunderbolt or a Special after the third hit to benefit from her Core Passive.',
+      'Swap to your damage dealer once the enemy is stunned and your support buffs are ready.'],
+    engines:[{id:'engine-13101',note:'Signature. Electric attacks work with the Energy-related passive.'},
+      {id:'engine-13005',note:'Craftable. Save Energy when you need the passive’s Impact stacks, then spend it to finish the stun.'}],
+    discs:[{id:'disc-31200',note:'4-piece. Adds Daze to Basics, Dash Attacks and Dodge Counters.'},
+      {id:'disc-31600',note:'2-piece. Extra Energy Regen for EX Special.'}],
+    main:['CRIT Rate or ATK%','Electric DMG or ATK%','Impact'],substats:['ATK%','CRIT Rate','CRIT DMG'],
+    sources:[agentReference('anby-demara')],
+  },
+]
+
+export const recommendedTeams: RecommendedTeam[] = [
+  {id:'phoenix-vortex',name:'Vortex and Luminize',agentIds:['agent-1641','agent-1561','agent-1581'],bangbooId:'boo-54023',alternatives:['agent-1171','agent-1331'],
+    reason:'Velina supplies Wind for Vortex. Phoenix enables Anomaly critical hits against targets with Sear. Remielle’s Luminize benefits and satisfies Ariel’s specific Agent requirement.',
+    sources:[release,agentReference('phoenix')]},
+  {id:'severian-stun',name:'Wind stun burst',agentIds:['agent-1631','agent-1621','agent-1311'],bangbooId:'boo-54022',alternatives:['agent-1571','agent-1481','agent-1211'],
+    reason:'Roxy satisfies Severian’s second Wind slot and provides stun windows. Astra can turn Quick Assists into Chain Attacks during her Ultimate setup, helping Severian gain resources. Roxy qualifies for Ultra Jake’s Roscaelifer condition.',
+    sources:[release,agentReference('severian')]},
+  {id:'frost-disorder',name:'Section 6 Disorder',agentIds:['agent-1091','agent-1221','agent-1411'],bangbooId:'boo-54014',alternatives:['agent-1131','agent-1401'],
+    reason:'Yanagi applies Electric Anomaly and helps connect Disorder sequences. Yuzuha supports squad Anomaly application. The two Section 6 members unlock Agent Gulliver’s Additional Ability.',
+    sources:[agentReference('miyabi')]},
+  {id:'cunning-hares',name:'Cunning Hares starter squad',agentIds:['agent-1081','agent-1011','agent-1031'],bangbooId:'boo-54005',alternatives:['agent-1021'],
+    reason:'Anby builds the stun, Nicole groups and lowers DEF, then Billy attacks during the debuff. The faction overlap meets Amillion’s requirement.',
+    sources:[agentReference('nicole-demara'),agentReference('anby-demara')]},
+  {id:'ice-stun',name:'Victoria Ice burst',agentIds:['agent-1191','agent-1141','agent-1131'],bangbooId:'boo-54001',alternatives:['agent-1161','agent-1311'],
+    reason:'Lycaon builds Daze and can reduce enemy Ice RES. Soukaku hands the active Agent an ATK buff, then Ellen attacks during the stun. All three match Sharkboo’s Ice requirement.',
+    sources:[agentReference('ellen'),agentReference('lycaon')]},
+  {id:'belobog-electric',name:'Belobog Shock',agentIds:['agent-1111','agent-1181','agent-1101'],bangbooId:'boo-54002',alternatives:['agent-1121','agent-1211'],
+    reason:'Grace applies Shock for Anton’s EX-mode attacks, while Koleda stuns and hands the field back to Anton. Safety gets its faction bonus with at least two Belobog members.',
+    sources:[agentReference('anton'),agentReference('grace')]},
+]
+
+export const guides: Guide[] = [
+  {id:'drive-discs',title:'Drive Disc stats',summary:'Plan slots, set bonuses and upgrades before you spend materials.',
+    sections:[
+      {title:'How sets combine',text:'Equip six pieces. Sets unlock bonuses at two and four pieces, so a four-piece set plus a second two-piece set activates three bonuses. Three two-piece sets is another valid layout.'},
+      {title:'Choose the right slots',text:'The main stats in slots 1, 2 and 3 are fixed. Slots 4, 5 and 6 define most of a build’s tradeoffs. Use the slot table below to check where a stat can appear.'},
+      {title:'Upgrade deliberately',text:'S-Rank discs cap at +15. Every three levels adds a missing substat or upgrades one already present. A disc cannot roll its own main stat as a substat.'}],
+    sources:['https://www.prydwen.gg/zenless/guides/disk-drives-stats',enka]},
+  {id:'squad-building',title:'Squad building and passive checks',summary:'Understand the conditions that make a team work.',
+    sections:[
+      {title:'Start from the damage plan',text:'Choose who spends the most field time and how the team creates a damage window. Attack teams often stack buffs around a stun. Anomaly teams can lean on application speed and switching to set up reactions.'},
+      {title:'Check every requirement',text:'Read each Additional Ability and the Bangboo’s activation text. A squad can meet the Agent condition while missing the Bangboo condition. Wind, specialized attributes and character-specific passives can add restrictions.'},
+      {title:'Treat usage as context',text:'Frequently played squads show what players used for a particular cycle. Boss resistances, investment, ownership and sample composition change what appears most often.'}],
+    sources:[release,'https://www.prydwen.gg/zenless/guides/combat']},
+  {id:'agent-progression',title:'Agent progression and farming',summary:'Understand level caps, skills, Core passives and promotion materials.',
+    sections:[
+      {title:'Raise the level cap',text:'Promote an Agent as they hit the current cap. Combat Simulation supplies certification seals, chips and other common upgrade resources.'},
+      {title:'Prioritize the kit',text:'Upgrade the actions the Agent actually uses first. Core Skill upgrades can improve mechanics and add base stats. Expert Challenge and Notorious Hunt provide distinct Core materials.'},
+      {title:'Promote matching W-Engines',text:'A W-Engine still provides its base and secondary stats when equipped by another specialty. The W-Engine effect activates only on a matching specialty. Overclock strengthens the effect without raising the engine’s level cap.'}],
+    sources:['https://www.prydwen.gg/zenless/guides/agents-progression','https://www.prydwen.gg/zenless/guides/w-engines']},
+  {id:'signal-search',title:'Reading the Signal Search schedule',summary:'See the difference between a banner return, a selector and a new Agent debut.',
+    sections:[
+      {title:'Versions and phases',text:'Limited Agent and W-Engine channels usually share a version phase. Special channels can overlap those periods. The banner browser displays times as server-local announcement times.'},
+      {title:'Plan from confirmed dates',text:'A banner announcement can name an Agent before giving its start and end times. The upcoming tab only counts a dated banner once its window has been verified.'},
+      {title:'Keep your own wishlist',text:'Mark Agents, W-Engines and Bangboo as planned on their profiles. The Collection page shows those entries in one place and the data remains in your browser.'}],
+    sources:['https://zenless.hoyoverse.com/en-us/news/167269','https://www.prydwen.gg/zenless/guides/gacha-system']},
+]
+
+export const buildByAgent = new Map(builds.map((build) => [build.agentId, build]))

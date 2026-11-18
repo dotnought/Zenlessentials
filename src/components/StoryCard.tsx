@@ -8,6 +8,10 @@ import { entryByID } from '../data/timeline'
 import { isComplete, totals } from '../progress'
 import type { Tracker } from '../progress'
 import { ProgressBar, TypeIcon } from './visuals'
+import { dbPath } from '../database/navigation'
+import links from '../database/data/story-links.json'
+
+const castLinks = links as { stories: Record<string, string[]>; names: Record<string,string> }
 
 export function storyLink(entry: NarrativeEntry) {
   return '/timeline?season=' + entry.season + '#' + entryAnchor(entry.id)
@@ -85,6 +89,9 @@ export function StoryCard({ entry, tracker, nextID, childFilter, showChildMatch,
       {(connections.length > 0 || entry.sourceURLs.length > 0) && <div className="story-links">
         {connections.map((id) => <Link key={id} to={storyLink(entryByID[id])}>{entryByID[id].title}<ArrowUpRight size={12} /></Link>)}
         {entry.sourceURLs.map((source) => <a key={source.url} href={source.url} target="_blank" rel="noreferrer">{source.label}<ArrowUpRight size={12} /></a>)}
+      </div>}
+      {castLinks.stories[entry.id] && <div className="story-links" aria-label="Agent profiles">
+        {castLinks.stories[entry.id].map((id) => <Link key={id} to={dbPath('agents',id)}>{castLinks.names[id]} · Agent profile <ArrowUpRight size={12} /></Link>)}
       </div>}
       {canWatch && !group && <div className="watch-actions">
         <button type="button" className="secondary-button" disabled={watched} onClick={() => tracker.mark(entry.id, 'watched')}><Eye size={14} /> {watched ? 'Watched' : 'Mark watched'}</button>
