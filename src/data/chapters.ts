@@ -1,0 +1,25 @@
+import type { Chapter } from './model'
+
+export const chapters: Chapter[] = [
+  { id: 's1-prologue', season: 1, label: 'Prologue', title: 'Business x Strangeness x Justness', description: 'The beginning of Phaethon’s story in New Eridu.' },
+  { id: 's1-cat', season: 1, label: 'Chapter 01', title: "Cat’s Lost & Found", description: 'A commission brings the Cunning Hares back to Random Play.' },
+  { id: 's1-zero', season: 1, label: 'Ch. 1 Intermission', title: 'The Zero Zone', description: 'Phaethon gains a foothold at Scott Outpost.' },
+  { id: 's1-hollow-heart', season: 1, label: 'Chapter 02', title: "A Call From the Hollow’s Heart", description: 'Belobog Heavy Industries calls in a Proxy.' },
+  { id: 's1-unthinkable', season: 1, label: 'Ch. 2 Interlude', title: 'Mission Unthinkable', description: 'Public Security crosses paths with Phaethon.' },
+  { id: 's1-midnight', season: 1, label: 'Chapter 03', title: 'The Midnight Pursuit', description: 'Victoria Housekeeping takes the stage.' },
+  { id: 's1-inferno', season: 1, label: 'Chapter 04', title: 'Tour de Inferno', description: 'The road leads out of New Eridu and into the Outer Ring.' },
+  { id: 's1-stars', season: 1, label: 'Chapter 05', title: 'A Storm of Falling Stars', description: 'The work of Section 6 collides with Phaethon’s investigation.' },
+  { id: 's1-epilogue', season: 1, label: 'Season Epilogue', title: 'Bury Your Tears With the Past', description: 'The closing stretch of the New Eridu arc.' },
+  { id: 's2-clouds', season: 2, label: 'Chapter 01', title: 'Where Clouds Embrace the Dawn', description: 'A new investigation begins on the Waifei Peninsula.' },
+  { id: 's2-waves', season: 2, label: 'Chapter 02', title: 'The Impending Crash of Waves', description: 'The investigation continues around Failume Heights.' },
+  { id: 's2-good-night', season: 2, label: 'Chapter 03', title: 'Do Not Go Gentle Into That Good Night', description: 'Phaethon runs into Obol Squad in Waifei.' },
+  { id: 's2-dreams', season: 2, label: 'Chapter 04', title: 'Memories of Dreams Bygone', description: 'New commissions take the siblings further into the case.' },
+  { id: 's2-abyss', season: 2, label: 'Chapter 05', title: 'On the Precipice of the Abyss', description: 'The stakes rise on the peninsula.' },
+  { id: 's2-fuel', season: 2, label: 'Chapter 06', title: 'To Be Fuel for the Night', description: 'The Waifei investigation reaches a turning point.' },
+  { id: 's2-encore', season: 2, label: 'Season Interlude', title: 'Encore for an Old Dream', description: 'The Angels of Delusion have a part to play.' },
+  { id: 's2-sunset', season: 2, label: 'Season Epilogue', title: 'New: Eridan Sunset', description: 'The season closes as Phaethon prepares to set out again.' },
+  { id: 's3-sleep', season: 3, label: 'Chapter 01', title: "A Sleepwalker’s Confession", description: 'Phaethon arrives in the sky city of Roscaelifer.' },
+  { id: 's3-goodbye', season: 3, label: 'Chapter 02', title: 'The Long Goodbye', description: 'The next Roscaelifer chapter opens Gear Street.' },
+  { id: 's3-histories', season: 3, label: 'Chapter 03', title: 'Their Secret Histories', description: 'The story continues in the Vyrium District.' },
+  { id: 's3-sky', season: 3, label: 'Chapter 04', title: 'Journey to the Sky', description: 'The route back to Booastrum takes Phaethon through Quietude Isle.' },
+]
