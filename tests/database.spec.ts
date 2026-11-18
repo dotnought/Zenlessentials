@@ -125,14 +125,14 @@ test('keeps the story usable offline and caches an Agent profile after a visit',
   await expect(page.getByRole('checkbox',{name:'Complete Business x Strangeness x Justness'})).toBeVisible()
 })
 
-test('uses the same T0–T2 placements across endgame modes and filters by actual specialty', async ({ page }) => {
+test('shows one main tier list and moves endgame usage to Agent profiles', async ({ page }) => {
   await page.goto('/database/tiers')
   await expect(page.locator('.db-tier-row h2')).toHaveText(['T0', 'T0.5', 'T1', 'T1.5', 'T2'])
   const tierFilter = page.getByRole('combobox', { name: 'Tier', exact: true })
   await expect(tierFilter.locator('option')).toHaveText(['All tiers', 'T0', 'T0.5', 'T1', 'T1.5', 'T2'])
   await expect(page.locator('[data-tier="T0"] a[href="/database/agents/agent-1631"]')).toBeVisible()
-  await page.getByRole('button', { name: 'Shiyu Defense' }).click()
-  await expect(page.locator('[data-tier="T0"] a[href="/database/agents/agent-1631"]')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Shiyu Defense|Deadly Assault/ })).toHaveCount(0)
+  await expect(page.locator('.db-tier-agent small').filter({ hasText: /%/ })).toHaveCount(0)
   await page.getByRole('combobox', { name: 'Specialty' }).selectOption('Armorer')
   await tierFilter.selectOption('T0.5')
   await expect(page.locator('.db-tier-row h2')).toHaveText(['T0.5'])
@@ -147,4 +147,10 @@ test('uses the same T0–T2 placements across endgame modes and filters by actua
   await expect(page.locator('.db-tier-row h2')).toHaveText(['T1'])
   await personalTier.selectOption({ label: 'Default' })
   await expect(page.locator('.db-tier-row h2')).toHaveText(['T0.5'])
+  await page.locator('.db-tier-row a').click()
+  await expect(page.getByRole('heading', { name: 'Endgame usage' })).toBeVisible()
+  const sample = JSON.parse(await readFile(new URL('../src/database/data/observations.json', import.meta.url), 'utf8'))
+  const usage = sample.agents['agent-1611']
+  await expect(page.getByText('Shiyu Defense', { exact: true }).locator('..').locator('dd')).toHaveText(usage.shiyu + '%')
+  await expect(page.getByText('Deadly Assault', { exact: true }).locator('..').locator('dd')).toHaveText(usage.deadly + '%')
 })

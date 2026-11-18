@@ -27,6 +27,7 @@ export function AgentPage({ id, state }: { id: string; state: CollectionState })
   }, [agent, id])
   if (!agent) return <Empty>This Agent isn’t in the released roster.</Empty>
   const build = buildByAgent.get(id)
+  const usage = observations.agents[id]
   const signature = agent.signatureId ? engineByID.get(agent.signatureId) : undefined
   const kitReady = kit?.id === id ? kit : undefined
   return <>
@@ -50,6 +51,14 @@ export function AgentPage({ id, state }: { id: string; state: CollectionState })
           {build ? <><p>{build.summary}</p><h3>Strengths</h3><ul>{build.strengths.map((note) => <li key={note}>{note}</li>)}</ul>
             <h3>Tradeoffs</h3><ul>{build.tradeoffs.map((note) => <li key={note}>{note}</li>)}</ul></> :
             <><p>{agent.specialty} · {agent.faction}</p>{agent.conditionText && <p><strong>Additional Ability</strong><br />{agent.conditionText}.</p>}</>}
+          {usage && <>
+            <h3>Endgame usage</h3>
+            <p className="db-muted">Sampled appearance rates · Cycle {observations.cycle}</p>
+            <dl className="db-stat-grid">
+              <div><dt>Shiyu Defense</dt><dd>{usage.shiyu}%</dd></div>
+              <div><dt>Deadly Assault</dt><dd>{usage.deadly}%</dd></div>
+            </dl>
+          </>}
         </DBPanel>
         <DBPanel title="Signature W-Engine">{signature ? <RecordLink route="engines" record={signature} meta={signature.specialty} /> : <p className="db-muted">A signature W-Engine is unverified.</p>}
           {signature && <p>{signature.passiveLevels?.[0]}</p>}

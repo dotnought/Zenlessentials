@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Search } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import { agents, observations } from './data'
+import { agents } from './data'
 import type { CollectionState } from './collection'
 import { matchesQuery } from './mechanics'
 import { dbPath } from './navigation'
@@ -12,7 +12,7 @@ import type { Tier } from './tiers'
 const specialties = [...new Set(agents.map((agent) => agent.specialty))].sort()
 
 export function TierList({ state }: { state: CollectionState }) {
-  const [mode,setMode] = useState<'deadly'|'shiyu'|'personal'>('deadly')
+  const [mode, setMode] = useState<'rankings'|'personal'>('rankings')
   const [role,setRole] = useState('')
   const [query,setQuery] = useState('')
   const [tierFilter, setTierFilter] = useState('')
@@ -25,8 +25,8 @@ export function TierList({ state }: { state: CollectionState }) {
   return <>
     <DBHeading title="Tier List" description="Browse the T0–T2 rankings or save your own placements." />
     <div className="panel db-toolbar">
-      <div className="db-tab-row db-plain-tabs" aria-label="Rankings mode">
-        {([['deadly','Deadly Assault'],['shiyu','Shiyu Defense'],['personal','My tier list']] as const).map(([value,label]) =>
+      <div className="db-tab-row db-plain-tabs" aria-label="Tier list view">
+        {([['rankings','Rankings'],['personal','My tier list']] as const).map(([value,label]) =>
           <button key={value} type="button" aria-pressed={mode === value} onClick={() => setMode(value)}>{label}</button>)}
       </div>
       <label className="search-field"><Search size={16} /><input type="search" aria-label="Search tier list" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Find an Agent…" /></label>
@@ -48,7 +48,7 @@ export function TierList({ state }: { state: CollectionState }) {
         <div>{members.map((agent) => <article className="db-tier-agent" key={agent.id}>
           <Link to={dbPath('agents',agent.id)}>
             <Thumbnail asset={agent} portrait /><strong>{agent.name}</strong>
-            <small>{mode !== 'personal' && observations.agents[agent.id] ? observations.agents[agent.id][mode] + '% usage' : agent.specialty}</small>
+            <small>{agent.specialty}</small>
           </Link>
           {mode === 'personal' && <select aria-label={'Tier for ' + agent.name} value={state.collection.tiers[agent.id] ?? ''} onChange={(event) => {
             const tier = event.target.value as Tier | ''
