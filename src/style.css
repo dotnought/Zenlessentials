@@ -391,6 +391,13 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
   .mobile-progress strong { color: var(--accent); }
 }
 @media (any-pointer: coarse) {
+  /* Keep Safari's long-press callout off app controls and internal navigation. */
+  a[href^="/"]:not([href^="//"]), a[href^="#"], button,
+  input:is([type="checkbox"], [type="radio"]), .checkbox, .setting-row, .theme-option {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
   .top-search input, .search-field input, select, .chapter-tools select { font-size: 16px; }
 }
 @media (prefers-reduced-motion: no-preference) {

@@ -60,6 +60,35 @@ test('keeps phone controls inside the safe area', async ({ page }, testInfo) => 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(844)
 })
 
+test('limits touch callout suppression to app controls', async ({ page, hasTouch }) => {
+  test.skip(!hasTouch, 'This checks touch interactions.')
+  await page.goto('/timeline?season=1#story-prologue')
+  const settings = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Settings' })
+  const prologue = page.locator('#story-prologue')
+  const toggle = prologue.getByRole('button', { name: 'Collapse Business x Strangeness x Justness' })
+  const checkbox = prologue.getByRole('checkbox')
+  const source = prologue.locator('a[target="_blank"]').first()
+  const search = page.getByRole('searchbox', { name: 'Search stories' })
+
+  for (const control of [settings, toggle, checkbox]) {
+    await expect(control).toHaveCSS('user-select', 'none')
+  }
+  for (const content of [source, search]) {
+    await expect(content).not.toHaveCSS('user-select', 'none')
+  }
+  if (await page.evaluate(() => CSS.supports('-webkit-touch-callout', 'none'))) {
+    await expect(settings).toHaveCSS('-webkit-touch-callout', 'none')
+    await expect(source).toHaveCSS('-webkit-touch-callout', 'default')
+  }
+
+  await checkbox.tap()
+  await expect(checkbox).toBeChecked()
+  await toggle.tap()
+  await expect(toggle).toBeHidden()
+  await settings.tap()
+  await expect(page).toHaveURL('/settings')
+})
+
 test('passes the progress backup to the native share sheet when file sharing is available', async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'canShare', { value: ({ files }: ShareData) => files?.[0]?.type === 'application/json' })
