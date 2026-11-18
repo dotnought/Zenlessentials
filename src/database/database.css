@@ -53,7 +53,7 @@
 .db-toolbar input { min-width: 0; }
 .db-facets { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 9px; min-width: 0; }
 .db-control { display: grid; gap: 4px; font-size: 11px; font-weight: 750; color: var(--muted); min-width: 0; max-width: 100%; }
-.db-control select, .db-control input, .db-tier-agent select { min-width: 0; min-height: 37px; border: 1px solid var(--border); color: #f2f1eb; border-radius: 8px; padding: 6px 8px; background: var(--surface-inset); font-weight: 550; font-size: 13px; }
+.db-control select, .db-control input { min-width: 0; min-height: 37px; border: 1px solid var(--border); color: #f2f1eb; border-radius: 8px; padding: 6px 8px; background: var(--surface-inset); font-weight: 550; font-size: 13px; }
 .db-control select:focus-visible, .db-control input:focus-visible { outline-offset: 1px; }
 .db-check { display: flex; align-items: center; gap: 7px; min-height: 36px; font-size: 13px; }
 .db-check input { accent-color: var(--accent); width: 17px; height: 17px; }
@@ -175,19 +175,35 @@
 .db-import-confirm { margin-top: 9px; border-top: 1px solid var(--border); }
 .db-tier-row { display: grid; grid-template-columns: 74px minmax(0,1fr); overflow: hidden; margin: 8px 0; --tier: #b4b9c2; }
 .db-tier-row h2 { display: grid; align-items: center; justify-items: center; color: #18181b; font: 800 35px/1 var(--title-font); margin: 0; background: var(--tier); }
-.db-tier-row[data-tier="T0"] { --tier: #eed267; }
-.db-tier-row[data-tier="T0.5"] { --tier: #fdac81; }
-.db-tier-row[data-tier="T1"] { --tier: #d6b3ff; }
-.db-tier-row[data-tier="T1.5"] { --tier: #94d8f0; }
-.db-tier-row[data-tier="T2"] { --tier: #9ed3ad; }
+:is(.db-tier-row,.db-tier-target)[data-tier="T0"] { --tier: #eed267; }
+:is(.db-tier-row,.db-tier-target)[data-tier="T0.5"] { --tier: #fdac81; }
+:is(.db-tier-row,.db-tier-target)[data-tier="T1"] { --tier: #d6b3ff; }
+:is(.db-tier-row,.db-tier-target)[data-tier="T1.5"] { --tier: #94d8f0; }
+:is(.db-tier-row,.db-tier-target)[data-tier="T2"] { --tier: #9ed3ad; }
 .db-tier-row > div { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,77px),1fr)); gap: 5px; padding: 7px; }
-.db-tier-agent { min-width: 0; text-align: center; }
+.db-tier-agent { position: relative; min-width: 0; text-align: center; }
 .db-tier-agent a { display: grid; gap: 3px; color: #f0edf1; }
 .db-tier-agent a:hover { color: var(--accent); }
 .db-tier-agent .db-thumbnail { width: 100%; aspect-ratio: 1.14; background: var(--surface-raised); border-radius: 6px; }
 .db-tier-agent strong, .db-tier-agent small { font-size: 11px; line-height: 1.12; overflow-wrap: anywhere; }
 .db-tier-agent small { color: var(--muted); }
-.db-tier-agent select { margin-top: 3px; min-height: 30px; width: 100%; }
+.db-tier-hint { margin: 0; font-size: 12px; }
+.db-tier-grip { position: absolute; top: 2px; right: 2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border); background: var(--chrome); color: #f0edf1; cursor: grab; touch-action: none; }
+.db-tier-grip:hover, .db-tier-grip:focus-visible { color: var(--accent); border-color: var(--accent-border); }
+.db-tier-grip:active { cursor: grabbing; }
+.db-tier-agent[data-dragging] { opacity: .38; }
+.db-tier-row[data-drop-over] { outline: 2px solid var(--tier); outline-offset: -2px; }
+.db-tier-empty { grid-column: 1 / -1; display: grid; align-items: center; min-height: 68px; margin: 0; border: 1px dashed var(--border); border-radius: 6px; padding: 8px; color: var(--muted); font-size: 12px; }
+.db-tier-dock { position: fixed; z-index: 18; bottom: max(16px,var(--safe-bottom)); right: max(16px,var(--safe-right)); width: min(390px,calc(100vw - max(16px,var(--safe-right)) - max(16px,var(--safe-left)))); display: grid; gap: 8px; padding: 10px; box-shadow: 0 12px 38px #0009; }
+.db-tier-dock-head { display: flex; align-items: center; justify-content: space-between; min-height: 35px; gap: 8px; }
+.db-tier-dock-head h2 { margin: 0; overflow-wrap: anywhere; }
+.db-tier-targets { display: grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap: 5px; }
+.db-tier-target { min-height: 42px; padding: 5px 0; border: 1px solid var(--tier); border-radius: 6px; background: var(--surface-inset); color: var(--tier); font: 800 23px/1 var(--title-font); }
+.db-tier-target[aria-current] { background: color-mix(in srgb,var(--tier) 18%,var(--surface)); }
+.db-tier-target:hover, .db-tier-target[data-drop-over] { color: #18181b; background: var(--tier); }
+.db-tier-dock > .secondary-button { justify-self: start; }
+.db-tier-drag-preview { width: max-content; max-width: 190px; display: flex; align-items: center; padding: 4px 9px 4px 4px; gap: 6px; color: #f0edf1; background: var(--chrome); border: 1px solid var(--accent-border); border-radius: 8px; box-shadow: 0 5px 18px #0009; font-size: 12px; pointer-events: none; }
+.db-tier-drag-preview .db-thumbnail { width: 32px; height: 32px; border-radius: 4px; flex: none; }
 
 .db-banner-group > h2 { font: 800 29px/1 var(--title-font); margin: 18px 0 6px; }
 .db-banner-card { overflow: hidden; min-width: 0; height: 100%; }
@@ -232,10 +248,12 @@
   .db-identity h1 { font-size: clamp(44px,12vw,70px); }
   .db-identity .db-rank { width: 23px; height: 23px; font-size: 20px; }
   .db-facets .db-control { flex: 1 1 90px; }
+  .db-tier-dock { bottom: calc(57px + var(--nav-bottom)); }
   .db-tier-row { grid-template-columns: 46px minmax(0,1fr); }
   .db-tier-row:is([data-tier="T0.5"], [data-tier="T1.5"]) h2 { font-size: 26px; }
 }
 @media (any-pointer: coarse) {
-  .db-control input, .db-control select, .db-tier-agent select { font-size: 16px; }
+  .db-tier-grip { width: 44px; height: 44px; background: color-mix(in srgb,var(--chrome) 85%,transparent); }
+  .db-control input, .db-control select { font-size: 16px; }
   .db-accordion summary { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 }

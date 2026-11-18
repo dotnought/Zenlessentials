@@ -75,7 +75,8 @@ test('shares team relationships and persists the collection and personal ranking
   await page.goto('/database/tiers')
   await page.getByRole('button',{name:'My tier list'}).click()
   await page.getByRole('searchbox',{name:'Search tier list'}).fill('Phoenix')
-  await page.getByLabel('Tier for Phoenix').selectOption('T0')
+  await page.getByRole('button', { name: 'Move Phoenix' }).click()
+  await page.getByRole('region', { name: 'Move Phoenix into a tier' }).getByRole('button', { name: 'T0', exact: true }).click()
   await page.goto('/database/collection')
   await expect(page.getByRole('combobox',{name:'Mindscape',exact:true})).toHaveValue('2')
   const file = page.waitForEvent('download')
@@ -140,17 +141,76 @@ test('shows one main tier list and moves endgame usage to Agent profiles', async
   await expect(page.locator('.db-tier-row a')).toHaveAttribute('href', '/database/agents/agent-1611')
   await page.getByRole('button', { name: 'My tier list' }).click()
   await tierFilter.selectOption('')
-  const personalTier = page.getByRole('combobox', { name: 'Tier for Claret' })
-  await expect(personalTier.locator('option')).toHaveText(['Default', 'T0', 'T0.5', 'T1', 'T1.5', 'T2'])
-  await expect(page.locator('.db-tier-row h2')).toHaveText(['T0.5'])
-  await personalTier.selectOption('T1')
-  await expect(page.locator('.db-tier-row h2')).toHaveText(['T1'])
-  await personalTier.selectOption({ label: 'Default' })
-  await expect(page.locator('.db-tier-row h2')).toHaveText(['T0.5'])
+  const grip = page.getByRole('button', { name: 'Move Claret' })
+  await expect(page.locator('[data-tier="T0.5"] .db-tier-agent')).toHaveCount(1)
+  await grip.press('Space')
+  const dock = page.getByRole('region', { name: 'Move Claret into a tier' })
+  await expect(dock.getByRole('button', { name: 'T0.5', exact: true })).toBeFocused()
+  await page.keyboard.press('Tab')
+  await page.keyboard.press('Enter')
+  await expect(page.locator('[data-tier="T1"] .db-tier-agent')).toHaveCount(1)
+  await grip.press('Space')
+  await dock.getByRole('button', { name: 'Reset to main tier' }).click()
+  await expect(page.locator('[data-tier="T0.5"] .db-tier-agent')).toHaveCount(1)
   await page.locator('.db-tier-row a').click()
   await expect(page.getByRole('heading', { name: 'Endgame usage' })).toBeVisible()
   const sample = JSON.parse(await readFile(new URL('../src/database/data/observations.json', import.meta.url), 'utf8'))
   const usage = sample.agents['agent-1611']
   await expect(page.getByText('Shiyu Defense', { exact: true }).locator('..').locator('dd')).toHaveText(usage.shiyu + '%')
   await expect(page.getByText('Deadly Assault', { exact: true }).locator('..').locator('dd')).toHaveText(usage.deadly + '%')
+})
+
+test('drags an Agent to any tier and saves the move', async ({ page, context }, testInfo) => {
+  await page.goto('/database/tiers')
+  await page.getByRole('button', { name: 'My tier list' }).click()
+  await page.getByRole('searchbox', { name: 'Search tier list' }).fill('Phoenix')
+  const filter = page.getByRole('combobox', { name: 'Tier', exact: true })
+  await filter.selectOption('T0.5')
+  const grip = page.getByRole('button', { name: 'Move Phoenix' })
+  await grip.scrollIntoViewIfNeeded()
+  const source = (await grip.boundingBox())!
+  const start = { x: source.x + source.width / 2, y: source.y + source.height / 2 }
+  const client = testInfo.project.name === 'iphone viewport' ? await context.newCDPSession(page) : undefined
+
+  if (client) {
+    await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [start] })
+    await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: start.x, y: start.y + 12 }] })
+  } else {
+    await page.mouse.move(start.x, start.y)
+    await page.mouse.down()
+    await page.mouse.move(start.x, start.y + 12, { steps: 3 })
+  }
+
+  const dock = page.getByRole('region', { name: 'Drop Phoenix into a tier' })
+  const destination = dock.getByRole('button', { name: 'T2', exact: true })
+  await expect(destination).toBeVisible()
+  const target = (await destination.boundingBox())!
+  const end = { x: target.x + target.width / 2, y: target.y + target.height / 2 }
+  if (client) await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [end] })
+  else await page.mouse.move(end.x, end.y, { steps: 5 })
+  await expect(destination).toHaveAttribute('data-drop-over', 'true')
+  if (client) await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] })
+  else await page.mouse.up()
+
+  await expect(dock).toHaveCount(0)
+  await filter.selectOption('')
+  await expect(page.locator('[data-tier="T2"]').getByRole('button', { name: 'Move Phoenix' })).toBeVisible()
+  await page.reload()
+  await page.getByRole('button', { name: 'My tier list' }).click()
+  await expect(page.locator('[data-tier="T2"]').getByRole('button', { name: 'Move Phoenix' })).toBeVisible()
+
+  if (testInfo.project.name === 'desktop') {
+    await page.getByRole('searchbox', { name: 'Search tier list' }).fill('Phoenix')
+    await grip.scrollIntoViewIfNeeded()
+    const card = (await grip.boundingBox())!
+    const emptyRow = page.locator('.db-tier-row[data-tier="T1"]')
+    await expect(emptyRow).toContainText('Drop Agents here')
+    const row = (await emptyRow.boundingBox())!
+    await page.mouse.move(card.x + card.width / 2, card.y + card.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(row.x + row.width / 2, row.y + row.height / 2, { steps: 10 })
+    await expect(emptyRow).toHaveAttribute('data-drop-over', 'true')
+    await page.mouse.up()
+    await expect(emptyRow.getByRole('button', { name: 'Move Phoenix' })).toBeVisible()
+  }
 })
