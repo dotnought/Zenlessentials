@@ -1,8 +1,11 @@
 import { useRef, useState } from 'react'
-import { Check, Download, EyeOff, HardDrive, Palette, RotateCcw, Upload } from 'lucide-react'
+import { Check, Download, EyeOff, HardDrive, Palette, RotateCcw, Share, Upload } from 'lucide-react'
 import { mergeProgress, parseProgress, serializeProgress } from '../progress'
 import type { Preferences, Tracker } from '../progress'
 import { themes } from '../themes'
+
+const backupName = 'zenlessentials-progress.json'
+const backupType = 'application/json'
 
 const switches: { key: Exclude<keyof Preferences, 'theme'>; title: string; note: string }[] = [
   { key: 'spoilerSafe', title: 'Spoiler-safe mode', note: 'Hide plot details for unfinished stories.' },
@@ -16,6 +19,8 @@ export function Settings({ tracker, compact = false }: { tracker: Tracker; compa
   const [message, setMessage] = useState('')
   const fileInput = useRef<HTMLInputElement>(null)
   const preferences = compact ? switches.slice(0, 2) : switches
+  const canShareBackup = !compact && typeof navigator.share === 'function' &&
+    navigator.canShare?.({ files: [new File(['{}'], backupName, { type: backupType })] })
 
   async function importFile(file: File) {
     try {
@@ -29,13 +34,24 @@ export function Settings({ tracker, compact = false }: { tracker: Tracker; compa
   }
 
   function exportFile() {
-    const url = URL.createObjectURL(new Blob([serializeProgress(tracker.progress)], { type: 'application/json' }))
+    const url = URL.createObjectURL(new Blob([serializeProgress(tracker.progress)], { type: backupType }))
     const link = document.createElement('a')
     link.href = url
-    link.download = 'zenlessentials-progress.json'
+    link.download = backupName
     link.click()
     window.setTimeout(() => URL.revokeObjectURL(url), 1000)
     setMessage('Backup exported.')
+  }
+
+  async function shareBackup() {
+    try {
+      const file = new File([serializeProgress(tracker.progress)], backupName, { type: backupType })
+      await navigator.share({ files: [file] })
+      setMessage('Backup shared.')
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return
+      setMessage('Sharing is unavailable. Use Export JSON to save your backup.')
+    }
   }
 
   return <div className={compact ? 'compact-settings' : 'settings-layout'}>
@@ -65,9 +81,10 @@ export function Settings({ tracker, compact = false }: { tracker: Tracker; compa
     </section>
     {!compact && <section className="panel settings-panel">
       <h2><HardDrive size={17} /> Local progress</h2>
-      <p>Progress lives in this browser for this website. Export a backup to move it to another browser or device.</p>
+      <p>Export a backup to move progress between Safari and the Home Screen app, or to another browser or device.</p>
       <div className="settings-actions">
         <button type="button" className="secondary-button" onClick={exportFile}><Download size={15} /> Export JSON</button>
+        {canShareBackup && <button type="button" className="secondary-button" onClick={() => void shareBackup()}><Share size={15} /> Share backup</button>}
         <button type="button" className="secondary-button" onClick={() => fileInput.current?.click()}><Upload size={15} /> Import JSON</button>
         <button type="button" className="secondary-button danger" onClick={() => {
           if (window.confirm('Clear every completion saved on this browser?')) {

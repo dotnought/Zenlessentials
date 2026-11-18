@@ -11,11 +11,11 @@ export default defineConfig({
   use: {
     baseURL: 'http://localhost:4173',
     trace: 'retain-on-failure',
-    launchOptions: executablePath ? { executablePath } : undefined,
   },
   projects: [
-    { name: 'desktop', use: { ...devices['Desktop Chrome'] } },
-    { name: 'iphone viewport', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium' } },
+    { name: 'desktop', use: { ...devices['Desktop Chrome'], launchOptions: { executablePath } } },
+    { name: 'iphone viewport', use: { ...devices['iPhone 13'], defaultBrowserType: 'chromium', launchOptions: { executablePath } } },
+    ...(process.env.PLAYWRIGHT_WEBKIT ? [{ name: 'iphone webkit', use: { ...devices['iPhone 13'] } }] : []),
   ],
   webServer: {
     command: 'npm run preview -- --port 4173 --strictPort',

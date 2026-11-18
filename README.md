@@ -15,6 +15,16 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 
 Progress and preferences are saved in this browser’s local storage for this site’s origin. Deployments on the same origin keep the data. Use **Settings → Export JSON** to back it up or move it to another browser, device, domain, or deploy preview. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
 
+## Install on iPhone or iPad
+
+1. Open Zenlessentials in Safari, then choose **Share → Add to Home Screen**.
+2. Turn on **Open as Web App** if Safari offers it, then tap **Add**.
+3. Open Zenlessentials from its Home Screen icon while online so it can save the app for offline use.
+
+The timeline, filters, statistics, theme picker, and checklists work offline after that first online launch finishes loading. Links to external sources still need an internet connection.
+
+Safari and the installed app use separate local storage. To bring your quest progress over, export it from Safari before opening the installed app, then choose **Settings → Import JSON** in the app. Use **Share backup → Save to Files** where supported, or download the file with **Export JSON**. Back up progress before removing an existing Home Screen installation. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
+
 ## Develop locally
 
 Use Node.js 22.12 or newer in the 22.x line, or Node.js 24 or newer.
@@ -35,7 +45,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-The browser tests use the production build through Vite preview and exercise desktop and iPhone-sized Chromium viewports. To use a system browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to its executable path. Run `npm run preview` to inspect the built site locally.
+The browser tests use the production build through Vite preview and exercise desktop and iPhone-sized Chromium viewports. To use a system Chromium, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE` to its executable path. For the iPhone-sized WebKit project, install WebKit with `npx playwright install webkit` and run `PLAYWRIGHT_WEBKIT=1 npm run test:e2e -- --project "iphone webkit"`. Run `npm run preview` to inspect the built site locally.
 
 | Path | Purpose |
 | --- | --- |
