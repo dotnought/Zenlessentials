@@ -504,6 +504,8 @@ export function Zenlessentials({ tracker, collection, account, accountLabel }: {
       <span>Zenlessentials is an unofficial, non-commercial fan project.</span>
       <a href={bannerSource}>Banner artwork by HoYoverse <ArrowUpRight size={13} /></a>
       <a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a>
+      <a href="https://github.com/dotnought/Zenlessentials/blob/main/CODE_OF_CONDUCT.md">Code of Conduct <ArrowUpRight size={13} aria-hidden="true" /></a>
+      <a href="https://www.netlify.com/">This site is powered by Netlify <ArrowUpRight size={13} aria-hidden="true" /></a>
       <small>© All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners.</small>
     </footer>
   </Shell>

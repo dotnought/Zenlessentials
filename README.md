@@ -109,4 +109,10 @@ Keep story summaries in your own words. Game titles and names identify the under
 
 ## Artwork
 
-The banner uses HoYoverse’s Cunning Hares illustration from the 40 million pre-registration announcement. Zenlessentials is an unofficial, non-commercial fan project. © All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners. [Official artwork](https://www.hoyolab.com/article/29770110) · [Zenless Zone Zero Fan Creations Guide](https://www.hoyolab.com/article/30075725)
+The Timeline banner uses HoYoverse’s Cunning Hares illustration from the 40 million pre-registration announcement. Other page banners reuse artwork from the game database. Zenlessentials is an unofficial, non-commercial fan project. © All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners. [Official artwork](https://www.hoyolab.com/article/29770110) · [Zenless Zone Zero Fan Creations Guide](https://www.hoyolab.com/article/30075725)
+
+## License and community
+
+The original Zenlessentials code and its accompanying software documentation are available under the [MIT License](LICENSE). HoYoverse artwork, game text, trademarks, and other third-party materials retain their existing rights and licenses. See [Database Sources](DATABASE_SOURCES.md) for asset and game-data credits.
+
+Contributors and project discussions follow the [Code of Conduct](CODE_OF_CONDUCT.md).
