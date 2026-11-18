@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { NarrativeEntry } from './data/model'
+import { defaultTheme, isTheme } from './themes'
+import type { Theme } from './themes'
 
 export type Completion = { method: 'played' | 'watched'; completedAt: string | null }
 export type Progress = Record<string, Completion>
@@ -15,6 +17,7 @@ export const defaults = {
   showOptional: true,
   showExpired: true,
   majorOnly: false,
+  theme: defaultTheme as Theme,
 }
 export type Preferences = typeof defaults
 
@@ -69,9 +72,13 @@ function readPreferences(): Preferences {
   try {
     const saved: unknown = JSON.parse(localStorage.getItem(preferenceKey) ?? '{}')
     if (record(saved)) {
-      return { ...defaults, ...Object.fromEntries(
-        Object.entries(defaults).filter(([key]) => typeof saved[key] === 'boolean').map(([key]) => [key, saved[key]]),
-      ) }
+      const preferences = { ...defaults }
+      if (isTheme(saved.theme)) preferences.theme = saved.theme
+      for (const key of Object.keys(defaults) as (keyof Preferences)[]) {
+        const value = saved[key]
+        if (key !== 'theme' && typeof value === 'boolean') preferences[key] = value
+      }
+      return preferences
     }
   } catch {
     // Storage might be unavailable in private or restricted contexts.
@@ -82,17 +89,26 @@ function readPreferences(): Preferences {
 export function useTracker() {
   const [progress, setProgress] = useState(readProgress)
   const [preferences, setPreferences] = useState(readPreferences)
-  const [storageError, setStorageError] = useState(false)
+  const [progressStorageError, setProgressStorageError] = useState(false)
+  const [preferenceStorageError, setPreferenceStorageError] = useState(false)
 
   useEffect(() => {
     try {
       localStorage.setItem(progressKey, serializeProgress(progress))
-      localStorage.setItem(preferenceKey, JSON.stringify(preferences))
-      setStorageError(false)
+      setProgressStorageError(false)
     } catch {
-      setStorageError(true)
+      setProgressStorageError(true)
     }
-  }, [progress, preferences])
+  }, [progress])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(preferenceKey, JSON.stringify(preferences))
+      setPreferenceStorageError(false)
+    } catch {
+      setPreferenceStorageError(true)
+    }
+  }, [preferences])
 
   useEffect(() => {
     function synchronize(event: StorageEvent) {
@@ -114,7 +130,7 @@ export function useTracker() {
     })
   }
 
-  return { progress, mark, setProgress, preferences, setPreferences, storageError }
+  return { progress, mark, setProgress, preferences, setPreferences, storageError: progressStorageError || preferenceStorageError }
 }
 
 export type Tracker = ReturnType<typeof useTracker>

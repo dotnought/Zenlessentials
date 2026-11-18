@@ -11,6 +11,7 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 - **Content Library** searches titles, characters, categories, and summaries. It includes filters for season, game version, progress, and availability, with dedicated Agent Story and Event views.
 - **Statistics** shows progress across the archive, by season, and by content type. Grouped stories count their individual parts.
 - **Settings** controls spoilers, optional content, expired content, and completed items. Expired events remain trackable and are recorded as watched. Replayable archived events support both played and watched.
+- **Settings → Appearance** offers Signal Yellow, Hollow Blue, Ether Violet, and Calydon Orange. Theme choices are saved automatically in this browser, independently of progress backups.
 
 Progress and preferences are saved in this browser’s local storage for this site’s origin. Deployments on the same origin keep the data. Use **Settings → Export JSON** to back it up or move it to another browser, device, domain, or deploy preview. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
 
@@ -75,4 +76,8 @@ Pushing or merging to `main` triggers a production deploy once the GitHub connec
 5. Update [CHRONOLOGY.md](CHRONOLOGY.md) with the new coverage and important placement decisions.
 6. Run the checks, build, and browser tests. Commit to a branch, review the preview when available, and merge to `main`.
 
-Keep story summaries in your own words. Game titles and names identify the underlying stories. The app uses original banner art and does not bundle screenshots or game media.
+Keep story summaries in your own words. Game titles and names identify the underlying stories.
+
+## Artwork
+
+The banner uses HoYoverse’s Cunning Hares illustration from the 40 million pre-registration announcement. Zenlessentials is an unofficial, non-commercial fan project. © All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners. [Official artwork](https://www.hoyolab.com/article/29770110) · [Zenless Zone Zero Fan Creations Guide](https://www.hoyolab.com/article/30075725)

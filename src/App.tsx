@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import { Link, NavLink, Route, Routes, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Activity, ArrowDown, ArrowRight, ArrowUpRight, BookOpen, ChartNoAxesColumn, CheckCircle2, ChevronDown,
@@ -16,7 +16,9 @@ import type { Tracker } from './progress'
 import { StoryCard, storyLink } from './components/StoryCard'
 import { ProgressBar, Ring, TypeIcon } from './components/visuals'
 import { Settings } from './components/Settings'
+import banner from './assets/cunning-hares.webp'
 
+const bannerSource = 'https://www.hoyolab.com/article/29770110'
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/timeline', label: 'Timeline', icon: RouteIcon },
@@ -47,7 +49,10 @@ function recommend(tracker: Tracker) {
 
 function Brand() {
   return <Link to="/" className="brand" aria-label="Zenlessentials home">
-    <img src="/mark.svg" alt="" width="37" height="37" />
+    <svg className="brand-mark" viewBox="0 0 48 48" width="37" height="37" aria-hidden="true">
+      <rect x="2" y="2" width="44" height="44" rx="12" />
+      <path d="M15 13h22l-2 4-15 14h12l-2 4H10l2-5 15-13H13z" />
+    </svg>
     <span>Zenlessentials<small>STORY TRACKER</small></span>
   </Link>
 }
@@ -98,6 +103,7 @@ function Shell({ children }: { children: React.ReactNode }) {
 
 function Hero() {
   return <section className="hero" aria-labelledby="timeline-title">
+    <img className="hero-art" src={banner} alt="" width="1600" height="900" fetchPriority="high" />
     <div className="hero-content">
       <div className="hero-label"><span /><span>PHAETHON’S STORY ARCHIVE</span></div>
       <h1 id="timeline-title">STORY<br /><em>TIMELINE</em></h1>
@@ -401,6 +407,14 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
 export default function App() {
   const tracker = useTracker()
   const next = recommend(tracker)
+
+  useLayoutEffect(() => {
+    const root = document.documentElement
+    root.dataset.theme = tracker.preferences.theme
+    const background = getComputedStyle(root).getPropertyValue('--base').trim()
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', background)
+  }, [tracker.preferences.theme])
+
   return <Shell>
     {tracker.storageError && <p className="storage-message" role="alert">Browser storage is unavailable. Export a backup before leaving this page.</p>}
     <Routes>
@@ -411,9 +425,14 @@ export default function App() {
       <Route path="/agents" element={<Library key="agents" tracker={tracker} mode="agents" />} />
       <Route path="/events" element={<Library key="events" tracker={tracker} mode="events" />} />
       <Route path="/stats" element={<Statistics tracker={tracker} />} />
-      <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Manage what you see and back up your progress." /><Settings tracker={tracker} /></>} />
+      <Route path="/settings" element={<><PageHeading title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />
     </Routes>
-    <footer className="site-footer"><span>Zenlessentials is an unofficial fan project.</span><a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a></footer>
+    <footer className="site-footer">
+      <span>Zenlessentials is an unofficial, non-commercial fan project.</span>
+      <a href={bannerSource}>Banner artwork by HoYoverse <ArrowUpRight size={13} /></a>
+      <a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a>
+      <small>© All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners.</small>
+    </footer>
   </Shell>
 }

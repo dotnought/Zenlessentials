@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
-import { Download, EyeOff, HardDrive, RotateCcw, Upload } from 'lucide-react'
+import { Check, Download, EyeOff, HardDrive, Palette, RotateCcw, Upload } from 'lucide-react'
 import { mergeProgress, parseProgress, serializeProgress } from '../progress'
 import type { Preferences, Tracker } from '../progress'
+import { themes } from '../themes'
 
-const switches: { key: keyof Preferences; title: string; note: string }[] = [
+const switches: { key: Exclude<keyof Preferences, 'theme'>; title: string; note: string }[] = [
   { key: 'spoilerSafe', title: 'Spoiler-safe mode', note: 'Hide plot details for unfinished stories.' },
   { key: 'hideCompleted', title: 'Hide completed', note: 'Focus on stories you still have to finish.' },
   { key: 'showOptional', title: 'Include optional content', note: 'Show side stories and other optional entries.' },
@@ -38,6 +39,22 @@ export function Settings({ tracker, compact = false }: { tracker: Tracker; compa
   }
 
   return <div className={compact ? 'compact-settings' : 'settings-layout'}>
+    {!compact && <section className="panel settings-panel appearance-panel">
+      <h2 id="appearance-heading"><Palette size={17} /> Appearance</h2>
+      <div className="theme-options" role="radiogroup" aria-labelledby="appearance-heading">
+        {themes.map((theme) => {
+          const selected = tracker.preferences.theme === theme.id
+          return <label key={theme.id} className="theme-option">
+            <input type="radio" name="site-theme" value={theme.id} checked={selected}
+              onChange={() => tracker.setPreferences((current) => ({ ...current, theme: theme.id }))} />
+            <span className="theme-card">
+              <span className="theme-preview" data-palette={theme.id} aria-hidden="true"><i /><i /><i /></span>
+              <span className="theme-name">{theme.name}{selected && <Check size={15} aria-hidden="true" />}</span>
+            </span>
+          </label>
+        })}
+      </div>
+    </section>}
     <section className="panel settings-panel">
       <h2><EyeOff size={17} /> {compact ? 'Quick settings' : 'Story visibility'}</h2>
       {preferences.map(({ key, title, note }) => <label key={key} className="setting-row">

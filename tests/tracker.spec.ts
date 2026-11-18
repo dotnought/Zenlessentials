@@ -85,3 +85,32 @@ test('production build serves nested routes and fits the viewport', async ({ pag
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(await page.evaluate(() => window.innerWidth))
   }
 })
+
+test('appearance restores old preferences and saves the selected theme with progress intact', async ({ page }) => {
+  await page.goto('/timeline')
+  const prologue = page.getByRole('checkbox', { name: 'Complete Business x Strangeness x Justness' })
+  await prologue.check()
+  await page.evaluate(() => localStorage.setItem('zenlessentials.preferences', JSON.stringify({ spoilerSafe: false })))
+  await page.goto('/settings')
+  await expect(page.getByRole('radio', { name: 'Signal Yellow' })).toBeChecked()
+  await expect(page.getByRole('switch', { name: /Spoiler-safe mode/ })).not.toBeChecked()
+
+  const root = page.locator('html')
+  const hollow = page.getByRole('radio', { name: 'Hollow Blue' })
+  await hollow.check()
+  await expect(root).toHaveCSS('background-color', 'rgb(13, 21, 27)')
+  await page.getByRole('radio', { name: 'Ether Violet' }).check()
+  await expect(root).toHaveCSS('background-color', 'rgb(21, 18, 29)')
+  await page.getByRole('radio', { name: 'Calydon Orange' }).check()
+  await expect(root).toHaveCSS('background-color', 'rgb(25, 19, 16)')
+  await hollow.check()
+  await page.reload()
+  await expect(hollow).toBeChecked()
+  await expect(root).toHaveAttribute('data-theme', 'hollow')
+
+  await page.getByRole('link', { name: 'Timeline', exact: true }).click()
+  await expect(prologue).toBeChecked()
+  await expect(root).toHaveAttribute('data-theme', 'hollow')
+  await expect(page.locator('.hero-art')).toHaveJSProperty('complete', true)
+  await expect(page.locator('.hero-art')).toHaveJSProperty('naturalWidth', 1600)
+})
