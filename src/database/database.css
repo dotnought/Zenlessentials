@@ -181,15 +181,18 @@
 :is(.db-tier-row,.db-tier-target)[data-tier="T1.5"] { --tier: #94d8f0; }
 :is(.db-tier-row,.db-tier-target)[data-tier="T2"] { --tier: #9ed3ad; }
 .db-tier-row > div { display: grid; grid-template-columns: repeat(auto-fill,minmax(min(100%,77px),1fr)); gap: 5px; padding: 7px; }
-.db-tier-agent { position: relative; min-width: 0; text-align: center; }
+.db-tier-agent { min-width: 0; text-align: center; }
 .db-tier-agent a { display: grid; gap: 3px; color: #f0edf1; }
 .db-tier-agent a:hover { color: var(--accent); }
 .db-tier-agent .db-thumbnail { width: 100%; aspect-ratio: 1.14; background: var(--surface-raised); border-radius: 6px; }
 .db-tier-agent strong, .db-tier-agent small { font-size: 11px; line-height: 1.12; overflow-wrap: anywhere; }
 .db-tier-agent small { color: var(--muted); }
 .db-tier-hint { margin: 0; font-size: 12px; }
-.db-tier-grip { position: absolute; top: 2px; right: 2px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 6px; border: 1px solid var(--border); background: var(--chrome); color: #f0edf1; cursor: grab; touch-action: none; }
-.db-tier-grip:hover, .db-tier-grip:focus-visible { color: var(--accent); border-color: var(--accent-border); }
+.db-tier-agent[data-personal] a, .db-tier-agent[data-personal] .db-thumbnail { border-radius: 6px 6px 0 0; }
+.db-tier-grip { display: grid; align-content: center; justify-items: center; width: 100%; min-height: 44px; padding: 3px; border: 1px solid var(--border); border-radius: 0 0 6px 6px; background: var(--surface-raised); color: #f0edf1; cursor: grab; touch-action: none; }
+.db-tier-grip svg { color: var(--muted); }
+.db-tier-grip:is(:hover,:focus-visible,[aria-expanded="true"]) { background: var(--accent-soft); border-color: var(--accent-border); }
+.db-tier-grip:is(:hover,:focus-visible,[aria-expanded="true"]) svg { color: var(--accent); }
 .db-tier-grip:active { cursor: grabbing; }
 .db-tier-agent[data-dragging] { opacity: .38; }
 .db-tier-row[data-drop-over] { outline: 2px solid var(--tier); outline-offset: -2px; }
@@ -253,7 +256,6 @@
   .db-tier-row:is([data-tier="T0.5"], [data-tier="T1.5"]) h2 { font-size: 26px; }
 }
 @media (any-pointer: coarse) {
-  .db-tier-grip { width: 44px; height: 44px; background: color-mix(in srgb,var(--chrome) 85%,transparent); }
   .db-control input, .db-control select { font-size: 16px; }
   .db-accordion summary { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
 }

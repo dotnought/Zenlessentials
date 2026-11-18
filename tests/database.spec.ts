@@ -167,8 +167,13 @@ test('drags an Agent to any tier and saves the move', async ({ page, context }, 
   const filter = page.getByRole('combobox', { name: 'Tier', exact: true })
   await filter.selectOption('T0.5')
   const grip = page.getByRole('button', { name: 'Move Phoenix' })
-  await grip.scrollIntoViewIfNeeded()
+  await grip.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
   const source = (await grip.boundingBox())!
+  const profile = page.getByRole('link', { name: 'Phoenix', exact: true })
+  await expect(profile).toHaveAttribute('href', /^\/database\/agents\//)
+  const portrait = (await profile.boundingBox())!
+  expect(source.y).toBeGreaterThanOrEqual(portrait.y + portrait.height - 0.5)
+  expect(source.height).toBeGreaterThanOrEqual(44)
   const start = { x: source.x + source.width / 2, y: source.y + source.height / 2 }
   const client = testInfo.project.name === 'iphone viewport' ? await context.newCDPSession(page) : undefined
 

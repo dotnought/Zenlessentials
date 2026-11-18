@@ -1,6 +1,6 @@
 import { DndContext, DragOverlay, MeasuringStrategy, PointerSensor, pointerWithin, useDraggable, useDroppable, useSensor } from '@dnd-kit/core'
 import type { Announcements, CollisionDetection, DragEndEvent } from '@dnd-kit/core'
-import { GripVertical, Search, X } from 'lucide-react'
+import { GripHorizontal, Search, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link } from 'react-router-dom'
@@ -92,7 +92,7 @@ export function TierList({ state }: { state: CollectionState }) {
           <option value="">All tiers</option>{tierOrder.map((item) => <option key={item}>{item}</option>)}
         </select></label>
       </div>
-      {personal && <p className="db-muted db-tier-hint">Drag an Agent by its grip, or select the grip to choose a tier.</p>}
+      {personal && <p className="db-muted db-tier-hint">Drag the nameplate under a portrait, or select it to choose a tier.</p>}
     </div>
     <p className="sr-only" role="status">{announcement}</p>
     {!selected.length && <Empty>No Agents match these filters.</Empty>}
@@ -141,16 +141,17 @@ function TierAgent({ agent, personal, choosing, onChoose }: {
   agent: Agent; personal: boolean; choosing: boolean; onChoose: (id: string) => void
 }) {
   const { listeners, setNodeRef, setActivatorNodeRef, isDragging } = useDraggable({ id: agent.id, disabled: !personal })
-  return <article className="db-tier-agent" ref={setNodeRef} data-dragging={isDragging || undefined}>
-    <Link to={dbPath('agents', agent.id)} onDragStart={personal ? (event) => event.preventDefault() : undefined}>
-      <Thumbnail asset={agent} portrait /><strong>{agent.name}</strong>
-      <small>{agent.specialty}</small>
+  const caption = <><strong>{agent.name}</strong><small>{agent.specialty}</small></>
+  return <article className="db-tier-agent" ref={setNodeRef} data-personal={personal || undefined} data-dragging={isDragging || undefined}>
+    <Link to={dbPath('agents', agent.id)} aria-label={personal ? agent.name : undefined}
+      onDragStart={personal ? (event) => event.preventDefault() : undefined}>
+      <Thumbnail asset={agent} portrait />{!personal && caption}
     </Link>
     {personal && <button type="button" id={handleId(agent.id)} className="db-tier-grip"
       ref={setActivatorNodeRef} {...listeners} aria-label={'Move ' + agent.name}
       aria-expanded={choosing} aria-controls={choosing ? 'tier-destinations' : undefined}
       onClick={() => onChoose(agent.id)}>
-      <GripVertical aria-hidden="true" size={17} />
+      {caption}<GripHorizontal aria-hidden="true" size={14} />
     </button>}
   </article>
 }
