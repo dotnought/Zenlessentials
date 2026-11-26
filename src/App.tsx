@@ -129,6 +129,14 @@ function Shell({ children }: { children: React.ReactNode }) {
         </form>
       </header>
       <main id="main-content" className="content">{children}</main>
+      <footer className="site-footer">
+        <span>Zenlessentials is an unofficial, non-commercial fan project.</span>
+        <PolicyLinks />
+        <a href={bannerSource}>Banner artwork by HoYoverse <ArrowUpRight size={13} /></a>
+        <a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a>
+        <a href="https://www.netlify.com/">This site is powered by Netlify <ArrowUpRight size={13} aria-hidden="true" /></a>
+        <small>© All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners.</small>
+      </footer>
     </div>
   </div>
 }
@@ -514,13 +522,5 @@ export function Zenlessentials({ tracker, collection, account, accountLabel }: {
       {policyPaths.map((path) => <Route key={path} path={path} element={<PolicyPage path={path} />} />)}
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />
     </Routes>
-    <footer className="site-footer">
-      <span>Zenlessentials is an unofficial, non-commercial fan project.</span>
-      <PolicyLinks />
-      <a href={bannerSource}>Banner artwork by HoYoverse <ArrowUpRight size={13} /></a>
-      <a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a>
-      <a href="https://www.netlify.com/">This site is powered by Netlify <ArrowUpRight size={13} aria-hidden="true" /></a>
-      <small>© All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners.</small>
-    </footer>
   </Shell>
 }

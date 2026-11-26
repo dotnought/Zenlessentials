@@ -47,6 +47,23 @@ test('uses the available space on a 3440 × 1440 display', async ({ page }, test
   const columns = await page.locator('.dashboard-panels').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' '))
   expect(columns).toHaveLength(3)
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(3440)
+  const footer = await page.getByRole('contentinfo').boundingBox()
+  expect(footer!.y + footer!.height).toBeCloseTo(1440, 0)
+})
+
+test('keeps the footer below the timeline and clear of phone navigation', async ({ page }) => {
+  await page.goto('/timeline')
+  const footer = page.getByRole('contentinfo')
+  await expect(footer).toBeAttached()
+  await expect(footer).not.toBeInViewport()
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+  await expect(footer).toBeInViewport({ ratio: 1 })
+  const sidebar = page.locator('.sidebar')
+  if (await sidebar.evaluate((element) => getComputedStyle(element).position === 'fixed')) {
+    const footerBox = await footer.boundingBox()
+    const sidebarBox = await sidebar.boundingBox()
+    expect(footerBox!.y + footerBox!.height).toBeLessThanOrEqual(sidebarBox!.y)
+  }
 })
 
 test('spoiler controls hide unfinished story details and reveal them on request', async ({ page }) => {
