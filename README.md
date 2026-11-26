@@ -77,7 +77,7 @@ The browser tests use the production build through Vite preview and exercise des
 
 ## GitHub and hosting
 
-The source repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials). [zenlessentials.org](https://zenlessentials.org/) is the official site, hosted by Cloudflare Pages. The [Pages address](https://zenlessentials.pages.dev/) and [Netlify address](https://zenlessentials.netlify.app/) remain available for existing installations and saves. Both providers use `main` for production. A push or merge to `main` can publish to both while their production builds are enabled. Use branches and pull requests for preview testing.
+The source repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials). [zenlessentials.org](https://zenlessentials.org/) is the official site, hosted by Cloudflare Pages. The [Pages address](https://zenlessentials.pages.dev/) and [Netlify address](https://zenlessentials.netlify.app/) remain available for existing installations and saves. Both providers use `main` as their production branch. Cloudflare Pages publishes updates from `main` while Netlify's Git-triggered builds are paused. Use branches and pull requests for preview testing.
 
 ### Cloudflare Pages
 
@@ -100,6 +100,8 @@ Pages Free allows 500 builds per month, including Git preview builds, with one c
 ### Netlify
 
 Import the same GitHub repository in [Netlify](https://app.netlify.com/) and select `main`. `netlify.toml` configures Node.js 22, the build, and the SPA rewrite. Netlify also reads `dist/_headers`. Set the two Supabase variables for production builds to enable the same account features. Netlify Deploy Previews can use the same build settings. [Netlify custom headers](https://docs.netlify.com/manage/routing/headers/)
+
+Git-triggered Netlify builds are paused while the Open Source application is pending. The existing Netlify deployment stays online. To resume automatic builds, remove `ignore = "exit 0"` from `netlify.toml` and merge the change to `main`. Manual deploys and build hooks can still trigger deployments during this pause. [Netlify ignore builds](https://docs.netlify.com/build/configure-builds/ignore-builds/)
 
 When checking either deployment, directly open and refresh `/timeline`, `/database/agents`, an Agent profile, and `/profile/account` if sign-in is enabled. Check that the manifest and service worker load, and that local progress survives a refresh. Authenticate with a test account before relying on sync at a new domain.
 
