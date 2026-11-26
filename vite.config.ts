@@ -2,6 +2,7 @@ import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwind from '@tailwindcss/vite'
 import { VitePWA } from 'vite-plugin-pwa'
+import { policyPages } from './scripts/policy-pages.ts'
 
 export default defineConfig({
   build: {
@@ -23,6 +24,7 @@ export default defineConfig({
     },
     react(),
     tailwind(),
+    policyPages(),
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {

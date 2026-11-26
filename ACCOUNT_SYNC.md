@@ -6,16 +6,38 @@ Story completions and played/watched status, ownership, favorites, wishlist, squ
 
 Changes to different stories, collection items, and preferences combine. If two devices edit the same item before receiving each other’s changes, the last device to sync that edit wins. Unchecking a story or removing an item syncs the removal. Guest import combines saved items, keeps the account's existing collection entries where they overlap, and uses the newer completion when both copies have it.
 
-## Enable on Netlify
+## Authentication by address
 
-1. Create or select a Supabase project. In its SQL Editor, run [the account saves migration](supabase/migrations/20261118000000_account_saves.sql) once. To use the CLI with a linked project, run `supabase db push`. The migration enables row-level security. Authenticated users can only read and write their own save row.
-2. In **Authentication → URL Configuration**, set **Site URL** to `https://zenlessentials.netlify.app` and add `https://zenlessentials.netlify.app/profile/account` to **Redirect URLs**. For local development, also add `http://localhost:5173/profile/account`.
-3. In Google Cloud, create an OAuth client of type **Web application**. Under **Authorized JavaScript origins**, add `https://zenlessentials.netlify.app`. Under **Authorized redirect URIs**, add the callback shown in the Supabase Google provider settings, typically `https://<project-ref>.supabase.co/auth/v1/callback`. Set up the Google consent screen and add your Google account as a test user if the app is in testing. Enable **Google** under Supabase **Authentication → Sign In / Providers**, and enter the Google OAuth client ID and secret there.
-4. In Supabase **Authentication**, enable email sign-in and new sign-ups. The default **Confirm sign up** and **Magic Link** emails work with the app as provided. The built-in sender is limited to project team addresses. For delivery to other addresses, configure custom SMTP. If your custom templates include a code via `{{ .Token }}`, choose **Enter a code** on **Profile → Account** to use it.
-5. In Netlify **Project configuration → Environment variables**, add `VITE_SUPABASE_URL` with the HTTPS project URL and `VITE_SUPABASE_PUBLISHABLE_KEY` with the project's **publishable** (`sb_publishable_…`) key. Apply them to production builds. Vite exposes both values in the browser. Keep Supabase secret keys, Google OAuth secrets, and SMTP credentials in their respective dashboards.
-6. Trigger a new production deploy. Open **Profile → Account**, request a sign-in email, and open its link in the same browser that requested it. Make a change and sign in from a second browser to confirm it arrives. Test Google in a separate session. If the iOS Home Screen app opens callbacks in a separate browser storage context, a custom email template with a code lets you enter it from inside the installed app.
+The official site and both legacy addresses use the same Supabase project. Accounts and cloud saves are shared. Authenticated users can access their own save row. [Account saves migration](supabase/migrations/20261118000000_account_saves.sql)
 
-For local development, copy `.env.example` to `.env.local` and set the same two public values. Without both values, the app runs in guest mode. Use a dedicated test project for deploy previews if you want preview accounts and data to stay separate from production.
+The Supabase **Site URL** is `https://zenlessentials.org`. The app returns to `/profile/account` on the address that started sign-in. These production callbacks are authorized:
+
+- `https://zenlessentials.org/profile/account`
+- `https://zenlessentials.pages.dev/profile/account`
+- `https://zenlessentials.netlify.app/profile/account`
+
+Google sends its response to the existing Supabase OAuth callback, typically `https://<project-ref>.supabase.co/auth/v1/callback`. If Google’s app is in **Testing**, its test-user restrictions still apply. For a hosted smoke test, confirm that Google and email return to the starting address, then check that an account save reaches **Up to date** and appears after signing in at another authorized address.
+
+For a new deployment, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the shared Supabase project URL and browser-safe publishable key. Keep service-role keys, Google OAuth secrets, and SMTP credentials in their respective service dashboards.
+
+Open a sign-in email in the browser that requested it. With the Supabase built-in sender, delivery is limited to project team addresses. If a custom template includes `{{ .Token }}`, **Enter a code** works inside an iOS Home Screen install even when a link opens in a different browser storage context.
+
+For local development, copy `.env.example` to `.env.local` and add `http://localhost:5173/profile/account` to the redirect list if you're using real auth. A build with both variables empty runs as a guest. Previews can use independent settings and a test Supabase project. If auth is enabled for a specific preview, explicitly allow its callback URL.
+
+## Move from a legacy address
+
+Your browser saves, sign-in session, and Home Screen installation belong to the address you used. Open the old site or install that has your saves before switching.
+
+**With account sync**
+
+1. At `https://zenlessentials.pages.dev` or `https://zenlessentials.netlify.app`, sign in under **Profile → Account**. If you have guest saves there, select **Import guest saves**. Wait for **Up to date** so the server has the changes.
+2. Open `https://zenlessentials.org` and sign in to the same account. Check the story progress and collection after the first sync. Follow the same steps within a new Home Screen install if you plan to use one.
+
+**With JSON backups**
+
+1. At the old address, use **Settings → Export JSON** for story progress and **Profile → Collection → Export collection** for ownership, favorites, wishlist, saved squads, and personal tiers.
+2. At zenlessentials.org, use **Settings → Import JSON** to merge story progress. Use **Profile → Collection → Import collection** to restore the collection. The collection import replaces the current collection after confirmation. Back up any collection you have already created at the official address first.
+3. Set theme and visibility preferences again if you moved only via JSON. Account sync also transfers preferences.
 
 ## Test without a provider account
 
@@ -28,4 +50,4 @@ npm run build
 npm run test:e2e -- tests/account.spec.ts
 ```
 
-Provider references [Google sign-in](https://supabase.com/docs/guides/auth/social-login/auth-google) · [Email codes](https://supabase.com/docs/guides/auth/auth-email-passwordless) · [SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp) · [Netlify environment variables](https://docs.netlify.com/build/environment-variables/overview/)
+Provider references [Supabase redirect URLs](https://supabase.com/docs/guides/auth/redirect-urls) · [Google sign-in](https://supabase.com/docs/guides/auth/social-login/auth-google) · [Email codes](https://supabase.com/docs/guides/auth/auth-email-passwordless) · [SMTP setup](https://supabase.com/docs/guides/auth/auth-smtp)

@@ -355,6 +355,20 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
 .site-footer a { display: flex; gap: 5px; align-items: center; }
 .site-footer small { flex-basis: 100%; font-size: inherit; }
 .site-footer a:hover { color: var(--accent); }
+.policy-links { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; }
+.policy-links a, .policy-copy a { color: var(--accent); text-decoration: underline; text-underline-offset: .2em; }
+.policy-links a { min-height: 24px; display: inline-flex; align-items: center; }
+.account-panel .policy-links { margin-top: 15px; font-size: 13px; }
+.static-intro { max-width: 56rem; margin: clamp(12px, 4vw, 44px) auto; padding: clamp(16px, 4vw, 36px); }
+.static-intro > .policy-links { margin-block: 12px; }
+.static-intro > h1, .policy-document h1 { margin: 0; color: var(--accent); font: italic 800 clamp(36px, 5vw, 64px)/1.05 var(--title-font); }
+.static-intro > p { margin: 12px 0; }
+.policy-document { max-width: 56rem; margin-inline: auto; padding: clamp(18px, 4vw, 44px); }
+.policy-copy { max-width: 72ch; margin-top: 20px; font-size: 15px; line-height: 1.7; overflow-wrap: anywhere; }
+.policy-copy h2 { margin: 26px 0 8px; font: 700 25px/1.2 var(--title-font); }
+.policy-copy p { margin: 8px 0 12px; }
+.policy-copy ul { list-style: disc; padding-inline-start: 1.35em; }
+.policy-copy li + li { margin-top: 7px; }
 .storage-message { border: 1px solid #78684d; background: #2c251b; padding: 9px; border-radius: 7px; margin-bottom: 12px; }
 .storage-message a { text-decoration: underline; }
 

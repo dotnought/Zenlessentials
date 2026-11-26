@@ -22,6 +22,8 @@ import banner from './assets/cunning-hares.webp'
 import { databaseSections, databaseTitle, dbPath } from './database/navigation'
 import { useCollection } from './database/collection'
 import type { Collection, CollectionState } from './database/collection'
+import { PolicyLinks, PolicyPage } from './policies/PolicyPage'
+import { isPolicyPath, policies, policyPaths, siteDescription, siteOrigin, siteTitle } from './policies/routes'
 
 const DatabaseApp = lazy(() => import('./database/DatabaseApp'))
 const CollectionPage = lazy(() => import('./database/CollectionPage'))
@@ -77,14 +79,25 @@ function Shell({ children }: { children: React.ReactNode }) {
   const { pathname, hash } = useLocation()
   const navigate = useNavigate()
   const [globalSearch, setGlobalSearch] = useState('')
+  const path = pathname.replace(/\/+$/, '') || '/'
+  const policy = isPolicyPath(path) ? policies[path] : undefined
   const inDatabase = pathname === '/database' || pathname.startsWith('/database/')
   const searchDatabase = inDatabase || pathname === '/profile/collection'
-  const breadcrumb = inDatabase ? 'Game Database' : pathname.startsWith('/profile') || ['/dashboard', '/settings'].includes(pathname) ? 'Zenlessentials' : 'Story Archive'
-  const title = inDatabase ? databaseTitle(pathname) : views[pathname] ?? 'Page unavailable'
+  const breadcrumb = inDatabase ? 'Game Database' : policy || path.startsWith('/profile') || ['/', '/dashboard', '/settings'].includes(path) ? 'Zenlessentials' : 'Story Archive'
+  const title = policy?.title ?? (inDatabase ? databaseTitle(path) : views[path] ?? 'Page unavailable')
+  const description = policy?.description ?? siteDescription
+  const home = path === '/' || path === '/dashboard'
   useEffect(() => {
-    document.title = title + ' — Zenlessentials'
+    const pageTitle = home ? siteTitle : title + ' — Zenlessentials'
+    const canonical = siteOrigin + (home ? '/' : path)
+    document.title = pageTitle
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', canonical)
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description)
+    document.querySelector('meta[property="og:url"]')?.setAttribute('content', canonical)
+    document.querySelector('meta[property="og:title"]')?.setAttribute('content', pageTitle)
+    document.querySelector('meta[property="og:description"]')?.setAttribute('content', description)
     if (!hash) window.scrollTo({ top: 0, behavior: 'instant' })
-  }, [pathname, hash, title])
+  }, [path, hash, title, description, home])
 
   return <div className="shell">
     <a href="#main-content" className="skip-link">Skip to content</a>
@@ -434,7 +447,7 @@ function Dashboard({ tracker, next }: { tracker: Tracker; next?: NarrativeEntry 
     .slice(0, 5)
   const currentChapter = next && chapters.find((chapter) => chapter.id === next.chapter)
   return <>
-    <PageHeading section="dashboard" title="Dashboard" subtitle="Pick up the story, look up an Agent, or build your next squad." />
+    <PageHeading section="dashboard" title="Dashboard" subtitle={siteDescription} />
     <div className="dashboard-grid dashboard-panels">
       <UpNext next={next} tracker={tracker} />
       <section className="panel chart-panel" aria-labelledby="dashboard-database-title">
@@ -498,13 +511,14 @@ export function Zenlessentials({ tracker, collection, account, accountLabel }: {
       </Route>
       <Route path="/stats" element={<Navigate to="/profile" replace />} />
       <Route path="/settings" element={<><PageHeading section="settings" title="Settings" subtitle="Choose a theme, adjust story visibility, and back up your progress." /><Settings tracker={tracker} /></>} />
+      {policyPaths.map((path) => <Route key={path} path={path} element={<PolicyPage path={path} />} />)}
       <Route path="*" element={<div className="empty panel"><CircleHelp size={28} /><h1>Page unavailable</h1><Link className="primary-button" to="/timeline">Back to timeline <ArrowRight size={16} /></Link></div>} />
     </Routes>
     <footer className="site-footer">
       <span>Zenlessentials is an unofficial, non-commercial fan project.</span>
+      <PolicyLinks />
       <a href={bannerSource}>Banner artwork by HoYoverse <ArrowUpRight size={13} /></a>
       <a href="https://github.com/dotnought/Zenlessentials/blob/main/CHRONOLOGY.md">Research &amp; coverage <ArrowUpRight size={13} /></a>
-      <a href="https://github.com/dotnought/Zenlessentials/blob/main/CODE_OF_CONDUCT.md">Code of Conduct <ArrowUpRight size={13} aria-hidden="true" /></a>
       <a href="https://www.netlify.com/">This site is powered by Netlify <ArrowUpRight size={13} aria-hidden="true" /></a>
       <small>© All rights reserved by miHoYo. Other properties and associated intellectual property rights belong to their respective owners.</small>
     </footer>

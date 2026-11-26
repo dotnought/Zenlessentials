@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@supabase/supabase-js'
 import type { SupabaseClient, User } from '@supabase/supabase-js'
 import { Cloud, LogOut, RefreshCw, Upload } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import App, { Zenlessentials } from '../App'
+import { PolicyLinks } from '../policies/PolicyPage'
+import { isPolicyPath } from '../policies/routes'
 import { collectionActions } from '../database/collection'
 import { trackerActions } from '../progress'
 import { emptySaves, equalSaves, readGuestSaves } from './saves'
@@ -40,6 +43,7 @@ function makeClient() {
 const client = makeClient()
 
 export default function AccountApp() {
+  const { pathname } = useLocation()
   const [user, setUser] = useState<Identity | null | undefined>(() => navigator.onLine ? undefined : cachedIdentity())
   const [callbackProblem, setCallbackProblem] = useState(returnedFromSignIn)
   useEffect(() => {
@@ -54,7 +58,7 @@ export default function AccountApp() {
   if (!client) return <App accountLabel="Sync unavailable" account={
     <section className="panel settings-panel"><h2>Account sync unavailable</h2><p>This site needs a valid account configuration.</p></section>
   } />
-  if (user === undefined) return <p className="account-loading" role="status">Checking account…</p>
+  if (user === undefined && !isPolicyPath(pathname.replace(/\/+$/, ''))) return <p className="account-loading" role="status">Checking account…</p>
   if (user) return <SignedIn key={user.id} client={client} user={user} />
   return <App accountLabel="Sign in to sync" account={<SignIn client={client} callbackProblem={callbackProblem} />} />
 }
@@ -142,6 +146,7 @@ function SignIn({ client, callbackProblem }: { client: SupabaseClient; callbackP
       </>}
     </form>
     {message && <p className="account-message" role="status">{message}</p>}
+    <PolicyLinks includeConduct={false} />
   </section>
 }
 
