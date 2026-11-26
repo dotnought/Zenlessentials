@@ -6,35 +6,37 @@ Story completions and played/watched status, ownership, favorites, wishlist, squ
 
 Changes to different stories, collection items, and preferences combine. If two devices edit the same item before receiving each other’s changes, the last device to sync that edit wins. Unchecking a story or removing an item syncs the removal. Guest import combines saved items, keeps the account's existing collection entries where they overlap, and uses the newer completion when both copies have it.
 
-## Configure authentication on both hosts
+## Authentication by address
 
-Keep Cloudflare Pages and Netlify on the same Supabase project. The existing accounts and `account_saves` table are shared. For a fresh Supabase project, apply [the account saves migration](supabase/migrations/20261118000000_account_saves.sql) once to give authenticated users access to their own save row.
+The official site and both legacy addresses use the same Supabase project. Accounts and cloud saves are shared. Authenticated users can access their own save row. [Account saves migration](supabase/migrations/20261118000000_account_saves.sql)
 
-1. In Supabase **Authentication → URL Configuration**, include both exact entries under **Redirect URLs**. Set **Site URL** to `https://zenlessentials.pages.dev` as the default destination once sign-in there is verified.
+The Supabase **Site URL** is `https://zenlessentials.org`. The app returns to `/profile/account` on the address that started sign-in. These production callbacks are authorized:
 
-   - `https://zenlessentials.pages.dev/profile/account`
-   - `https://zenlessentials.netlify.app/profile/account`
+- `https://zenlessentials.org/profile/account`
+- `https://zenlessentials.pages.dev/profile/account`
+- `https://zenlessentials.netlify.app/profile/account`
 
-2. In the existing Google OAuth **Web application** client, include `https://zenlessentials.pages.dev` and `https://zenlessentials.netlify.app` under **Authorized JavaScript origins**. The **Authorized redirect URI** remains the callback shown under the Google provider in Supabase, typically `https://<project-ref>.supabase.co/auth/v1/callback`. The app asks Supabase to return the user to `/profile/account` on the host that initiated sign-in. If Google's app is in **Testing**, its test-user restrictions still apply.
-3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the same project's HTTPS URL and **publishable** (`sb_publishable_…`) key in both providers' production build environments. In Cloudflare Pages, use **Settings → Variables and Secrets**. In Netlify, use **Project configuration → Environment variables** with **Builds** scope. Vite exposes both values in the browser. Keep service-role keys, Google OAuth secrets, and SMTP credentials in their respective service dashboards.
-4. In Supabase **Authentication**, enable email sign-in and new sign-ups as needed. The default **Confirm sign up** and **Magic Link** emails work for project team addresses with the built-in sender. For delivery to other addresses, configure custom SMTP. If your templates include `{{ .Token }}`, the **Enter a code** option works with it.
-5. Verify email and Google sign-in from each production site. Open email links in the browser that requested them. Check that an account save reaches **Up to date** on one host and appears on the other after signing in there. If an iOS Home Screen install opens the callback in a separate browser storage context, an email code can be entered directly into the install when custom templates provide one.
+Google sends its response to the existing Supabase OAuth callback, typically `https://<project-ref>.supabase.co/auth/v1/callback`. If Google’s app is in **Testing**, its test-user restrictions still apply. For a hosted smoke test, confirm that Google and email return to the starting address, then check that an account save reaches **Up to date** and appears after signing in at another authorized address.
+
+For a new deployment, set `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` to the shared Supabase project URL and browser-safe publishable key. Keep service-role keys, Google OAuth secrets, and SMTP credentials in their respective service dashboards.
+
+Open a sign-in email in the browser that requested it. With the Supabase built-in sender, delivery is limited to project team addresses. If a custom template includes `{{ .Token }}`, **Enter a code** works inside an iOS Home Screen install even when a link opens in a different browser storage context.
 
 For local development, copy `.env.example` to `.env.local` and add `http://localhost:5173/profile/account` to the redirect list if you're using real auth. A build with both variables empty runs as a guest. Previews can use independent settings and a test Supabase project. If auth is enabled for a specific preview, explicitly allow its callback URL.
 
-## Move from Netlify to Cloudflare Pages
+## Move from a legacy address
 
 Your browser saves, sign-in session, and Home Screen installation belong to the address you used. Open the old site or install that has your saves before switching.
 
 **With account sync**
 
-1. At `https://zenlessentials.netlify.app`, sign in under **Profile → Account**. If you have guest saves there, select **Import guest saves**. Wait for **Up to date** so the server has the changes.
-2. Open `https://zenlessentials.pages.dev` and sign in to the same account. Check the story progress and collection after the first sync. Follow the same steps within a new Home Screen install if you plan to use one.
+1. At `https://zenlessentials.pages.dev` or `https://zenlessentials.netlify.app`, sign in under **Profile → Account**. If you have guest saves there, select **Import guest saves**. Wait for **Up to date** so the server has the changes.
+2. Open `https://zenlessentials.org` and sign in to the same account. Check the story progress and collection after the first sync. Follow the same steps within a new Home Screen install if you plan to use one.
 
 **With JSON backups**
 
-1. On the Netlify site, use **Settings → Export JSON** for story progress and **Profile → Collection → Export collection** for ownership, favorites, wishlist, saved squads, and personal tiers.
-2. On Cloudflare Pages, use **Settings → Import JSON** to merge story progress. Use **Profile → Collection → Import collection** to restore the collection. The collection import replaces the current collection after confirmation, so back up any collection you already created on Pages first.
+1. At the old address, use **Settings → Export JSON** for story progress and **Profile → Collection → Export collection** for ownership, favorites, wishlist, saved squads, and personal tiers.
+2. At zenlessentials.org, use **Settings → Import JSON** to merge story progress. Use **Profile → Collection → Import collection** to restore the collection. The collection import replaces the current collection after confirmation. Back up any collection you have already created at the official address first.
 3. Set theme and visibility preferences again if you moved only via JSON. Account sync also transfers preferences.
 
 ## Test without a provider account

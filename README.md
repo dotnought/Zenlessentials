@@ -2,7 +2,7 @@
 
 Zenlessentials is an unofficial Zenless Zone Zero companion with a story tracker and game database. It puts main chapters, Special Episodes, Agent Stories, limited events, and side commissions on one interactive timeline. The recommended path follows narrative context, and every timeline placement comes with a reason and references.
 
-[Open Zenlessentials on Cloudflare Pages](https://zenlessentials.pages.dev/)
+[Open Zenlessentials at zenlessentials.org](https://zenlessentials.org/)
 
 The latest researched game version is **3.3, Journey to the Sky**. See [Chronology and research coverage](CHRONOLOGY.md) for the source conventions, placement decisions, and open gaps.
 
@@ -17,7 +17,7 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 
 Progress and preferences are saved in your browser for the site address you use. Deployments at the same address keep that data. Use **Settings → Export JSON** to back up story completions. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
 
-When account sync is configured, **Profile → Account** lets you sign in with Google or an email link and sync your saves across devices. To bring your Netlify progress or collection to Cloudflare Pages, follow [Move from Netlify to Cloudflare Pages](ACCOUNT_SYNC.md#move-from-netlify-to-cloudflare-pages).
+When account sync is configured, **Profile → Account** lets you sign in with Google or an email link and sync your saves across devices. To transfer saves from the Pages or Netlify address to zenlessentials.org, follow [Move from a legacy address](ACCOUNT_SYNC.md#move-from-a-legacy-address).
 
 ## Use the game database
 
@@ -30,13 +30,13 @@ The factual catalog and artwork are served by Zenlessentials. See [Database sour
 
 ## Install on iPhone or iPad
 
-1. Open [zenlessentials.pages.dev](https://zenlessentials.pages.dev/) in Safari, then choose **Share → Add to Home Screen**.
+1. Open [zenlessentials.org](https://zenlessentials.org/) in Safari, then choose **Share → Add to Home Screen**.
 2. Turn on **Open as Web App** if Safari offers it, then tap **Add**.
 3. Open Zenlessentials from its Home Screen icon while online so it can save the app for offline use.
 
 The timeline, filters, Profile story statistics, theme picker, and checklists work offline after that first online launch finishes loading. The database downloads its catalog and caches artwork as you visit pages. Open the collection and any database pages you need while online first. Links to external sources still need an internet connection.
 
-The existing Netlify Home Screen icon opens the Netlify site. Install from the Cloudflare Pages URL to open the new site. Back up or sync any guest saves from the existing installation before removing it. Safari and its Home Screen app can have separate storage. Export from the browser or installation that holds your data. **Share backup → Save to Files** can save story progress on supported devices. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
+Home Screen installations from the Pages or Netlify address still open that address. Install from zenlessentials.org to use the official domain. Back up or sync guest saves from the existing installation before removing it. Safari and its Home Screen app can have separate storage. Export from the browser or installation that holds your data. **Share backup → Save to Files** can save story progress on supported devices. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
 
 ## Develop locally
 
@@ -73,10 +73,11 @@ The browser tests use the production build through Vite preview and exercise des
 | `tests/` | Progress unit tests and production browser tests |
 | `public/_headers` | Shared cache headers for Cloudflare Pages and Netlify |
 | `netlify.toml` | Netlify build and SPA routing |
+| `PRIVACY.md`, `TERMS.md`, `CODE_OF_CONDUCT.md` | Source text for the public policy pages |
 
 ## GitHub and hosting
 
-The source repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials). Both providers use `main` for production. [Cloudflare Pages](https://zenlessentials.pages.dev/) is the primary site, and [Netlify](https://zenlessentials.netlify.app/) remains available. A push or merge to `main` can publish to both while their production builds are enabled. Use branches and pull requests for routine changes and preview testing.
+The source repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials). [zenlessentials.org](https://zenlessentials.org/) is the official site, hosted by Cloudflare Pages. The [Pages address](https://zenlessentials.pages.dev/) and [Netlify address](https://zenlessentials.netlify.app/) remain available for existing installations and saves. Both providers use `main` for production. A push or merge to `main` can publish to both while their production builds are enabled. Use branches and pull requests for preview testing.
 
 ### Cloudflare Pages
 
@@ -90,7 +91,7 @@ In **Workers & Pages**, create a Pages project with **Connect to Git** and selec
 | Build output directory | `dist` |
 | Build variable `NODE_VERSION` | `22` |
 
-For sign-in and sync, set both `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the production build environment. Keep both hosts on the same Supabase project and configure callback URLs in [Account sync](ACCOUNT_SYNC.md#configure-authentication-on-both-hosts). Preview deployments have separate origins and build variables.
+For sign-in and sync on a new deployment, set both `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in its build environment. See [Account sync](ACCOUNT_SYNC.md#authentication-by-address) for the existing callback URLs. Preview deployments have separate origins and build variables.
 
 Pages serves the React Router app shell for nested routes through its default SPA fallback. Keep the build free of a top-level `404.html` to retain this behavior. The app uses static hosting and talks directly to Supabase. Vite copies `public/_headers` to `dist/_headers` for immutable caching of hashed assets and revalidation of the service worker and manifest. Leave HTML and navigation on their default cache policy so a new deployment can load its new bundle. [Pages serving behavior](https://developers.cloudflare.com/pages/configuration/serving-pages/) · [Pages custom headers](https://developers.cloudflare.com/pages/configuration/headers/)
 
@@ -101,6 +102,14 @@ Pages Free allows 500 builds per month, including Git preview builds, with one c
 Import the same GitHub repository in [Netlify](https://app.netlify.com/) and select `main`. `netlify.toml` configures Node.js 22, the build, and the SPA rewrite. Netlify also reads `dist/_headers`. Set the two Supabase variables for production builds to enable the same account features. Netlify Deploy Previews can use the same build settings. [Netlify custom headers](https://docs.netlify.com/manage/routing/headers/)
 
 When checking either deployment, directly open and refresh `/timeline`, `/database/agents`, an Agent profile, and `/profile/account` if sign-in is enabled. Check that the manifest and service worker load, and that local progress survives a refresh. Authenticate with a test account before relying on sync at a new domain.
+
+### Public policies and Google OAuth branding
+
+The build renders the homepage introduction and the three policy routes into HTML. React uses the same policy text. Preview edits by opening `/privacy`, `/terms`, and `/code-of-conduct` directly in a signed-out browser.
+
+Review and approve the Privacy Policy and Terms of Service before publishing. Confirm who handles privacy requests and how to arrange private follow-up. The repository can verify the app’s data flows and the account deletion cascade. Provider-side logging, analytics or security cookies, mail delivery, backup retention, and the deletion process need maintainer review.
+
+After the approved pages are live, open **Google Auth Platform → Branding** and list the homepage as `https://zenlessentials.org/`, the Privacy Policy as `https://zenlessentials.org/privacy`, and the Terms of Service as `https://zenlessentials.org/terms`. Open each signed out before submitting branding changes for verification. [Google OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
 
 ### Restrict access on Netlify
 
