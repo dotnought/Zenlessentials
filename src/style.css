@@ -413,7 +413,8 @@ select { color: #e1e1e4; background: var(--surface-2); border: 1px solid #373940
   .nav-link { flex-direction: column; gap: 3px; min-height: 45px; padding: 3px 1px; font-size: 8px; text-align: center; }
   .nav-link span { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
   .settings-nav { margin-top: 0; }
-  .workspace { padding-bottom: calc(50px + var(--nav-bottom)); }
+  /* Bottom navigation labels can wrap onto two lines at phone widths. */
+  .workspace { padding-bottom: calc(60px + var(--nav-bottom)); }
   .content { padding: 12px 12px 0; }
   .topbar { height: 48px; padding: 0 12px; gap: 8px; }
   .breadcrumb { white-space: nowrap; gap: 5px; }

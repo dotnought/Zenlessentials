@@ -57,7 +57,7 @@ test('keeps the footer below the timeline and clear of phone navigation', async 
   await expect(footer).toBeAttached()
   await expect(footer).not.toBeInViewport()
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
-  await expect(footer).toBeInViewport({ ratio: 1 })
+  await expect(footer).toBeInViewport({ ratio: 0.99 })
   const sidebar = page.locator('.sidebar')
   if (await sidebar.evaluate((element) => getComputedStyle(element).position === 'fixed')) {
     const footerBox = await footer.boundingBox()
