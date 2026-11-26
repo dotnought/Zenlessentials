@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { Marked } from 'marked'
 import type { Plugin } from 'vite'
-import { policies, policyPaths, siteDescription, siteOrigin, siteTitle } from '../src/policies/routes'
-import type { PolicyPath } from '../src/policies/routes'
+import { policies, policyPaths, siteDescription, siteOrigin, siteTitle } from '../src/policies/routes.ts'
+import type { PolicyPath } from '../src/policies/routes.ts'
 
 const moduleName = 'virtual:policy-content'
 const moduleId = '\0' + moduleName
