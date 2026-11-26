@@ -2,6 +2,8 @@
 
 Zenlessentials is an unofficial Zenless Zone Zero companion with a story tracker and game database. It puts main chapters, Special Episodes, Agent Stories, limited events, and side commissions on one interactive timeline. The recommended path follows narrative context, and every timeline placement comes with a reason and references.
 
+[Open Zenlessentials on Cloudflare Pages](https://zenlessentials.pages.dev/)
+
 The latest researched game version is **3.3, Journey to the Sky**. See [Chronology and research coverage](CHRONOLOGY.md) for the source conventions, placement decisions, and open gaps.
 
 ## Use the tracker
@@ -13,9 +15,9 @@ The latest researched game version is **3.3, Journey to the Sky**. See [Chronolo
 - **Settings** controls spoilers, optional content, expired content, and completed items. Expired events remain trackable and are recorded as watched. Replayable archived events support both played and watched.
 - **Settings → Appearance** offers Signal Yellow, Hollow Blue, Ether Violet, and Calydon Orange. Theme choices are saved automatically in this browser, independently of progress backups.
 
-Progress and preferences are saved in this browser’s local storage for this site’s origin. Deployments on the same origin keep the data. Use **Settings → Export JSON** to back it up or move it to another browser, device, domain, or deploy preview. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
+Progress and preferences are saved in your browser for the site address you use. Deployments at the same address keep that data. Use **Settings → Export JSON** to back up story completions. Import merges completions and keeps the newest record for each ID. Reset clears completions only after confirmation.
 
-When account sync is configured, **Profile → Account** lets you sign in with Google or an email link and sync your saves across devices. See [Account sync setup and behavior](ACCOUNT_SYNC.md).
+When account sync is configured, **Profile → Account** lets you sign in with Google or an email link and sync your saves across devices. To bring your Netlify progress or collection to Cloudflare Pages, follow [Move from Netlify to Cloudflare Pages](ACCOUNT_SYNC.md#move-from-netlify-to-cloudflare-pages).
 
 ## Use the game database
 
@@ -28,13 +30,13 @@ The factual catalog and artwork are served by Zenlessentials. See [Database sour
 
 ## Install on iPhone or iPad
 
-1. Open Zenlessentials in Safari, then choose **Share → Add to Home Screen**.
+1. Open [zenlessentials.pages.dev](https://zenlessentials.pages.dev/) in Safari, then choose **Share → Add to Home Screen**.
 2. Turn on **Open as Web App** if Safari offers it, then tap **Add**.
 3. Open Zenlessentials from its Home Screen icon while online so it can save the app for offline use.
 
 The timeline, filters, Profile story statistics, theme picker, and checklists work offline after that first online launch finishes loading. The database downloads its catalog and caches artwork as you visit pages. Open the collection and any database pages you need while online first. Links to external sources still need an internet connection.
 
-Safari and the installed app use separate local storage. To bring your quest progress over, export it from Safari before opening the installed app, then choose **Settings → Import JSON** in the app. Use **Share backup → Save to Files** where supported, or download the file with **Export JSON**. Back up progress before removing an existing Home Screen installation. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
+The existing Netlify Home Screen icon opens the Netlify site. Install from the Cloudflare Pages URL to open the new site. Back up or sync any guest saves from the existing installation before removing it. Safari and its Home Screen app can have separate storage. Export from the browser or installation that holds your data. **Share backup → Save to Files** can save story progress on supported devices. [Apple’s installation guide](https://support.apple.com/en-us/guide/iphone/iphea86e5236/ios) · [WebKit’s storage details](https://webkit.org/blog/14787/webkit-features-in-safari-17-2/)
 
 ## Develop locally
 
@@ -69,30 +71,38 @@ The browser tests use the production build through Vite preview and exercise des
 | `public/database-art/` | Optimized local game artwork |
 | `scripts/validate-data.ts` | Validates entries, references, chronology, and quest groups |
 | `tests/` | Progress unit tests and production browser tests |
-| `netlify.toml` | Netlify build, asset caching, and SPA routing |
+| `public/_headers` | Shared cache headers for Cloudflare Pages and Netlify |
+| `netlify.toml` | Netlify build and SPA routing |
 
-## GitHub and Netlify
+## GitHub and hosting
 
-The production repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials), with `main` as the deployment branch. The production site is [zenlessentials.netlify.app](https://zenlessentials.netlify.app/). To deploy a separate copy, create or select an empty GitHub repository and push your checkout’s `main` branch to it.
+The source repository is [dotnought/Zenlessentials](https://github.com/dotnought/Zenlessentials). Both providers use `main` for production. [Cloudflare Pages](https://zenlessentials.pages.dev/) is the primary site, and [Netlify](https://zenlessentials.netlify.app/) remains available. A push or merge to `main` can publish to both while their production builds are enabled. Use branches and pull requests for routine changes and preview testing.
 
-```sh
-git remote -v
-git push -u origin main
-```
+### Cloudflare Pages
 
-Use branches and pull requests for routine changes. Keep the lockfile and `netlify.toml` in Git. Dependencies, build output, local environment files, and test artifacts are ignored.
+In **Workers & Pages**, create a Pages project with **Connect to Git** and select the repository. Use the React/Vite preset and the following configuration. [Cloudflare Git integration guide](https://developers.cloudflare.com/pages/get-started/git-integration/)
 
-1. Sign in to [Netlify](https://app.netlify.com/).
-2. In your Netlify team, select **Add new project → Import an existing project → GitHub**.
-3. Complete the one-time GitHub authorization. If GitHub asks which repositories Netlify may access, select `dotnought/Zenlessentials`.
-4. Select the repository and verify the production branch is `main`.
-5. Leave the base directory at the repository root. Verify that the build command is `npm run build` and the publish directory is `dist`. The repository’s configuration supplies both settings and uses Node.js 22.
-6. Select **Deploy** and wait for the published deploy. Set **Project configuration → General → Visitor access → Project visibility** to **Public** to make production accessible without a Netlify account.
-7. Open the production address from the project overview. Refresh `/timeline`, `/database/agents`, and an Agent profile directly, and confirm a checked story persists after a reload.
+| Setting | Value |
+| --- | --- |
+| Production branch | `main` |
+| Root directory | Repository root |
+| Build command | `npm run build` |
+| Build output directory | `dist` |
+| Build variable `NODE_VERSION` | `22` |
 
-Pushing or merging to `main` triggers a production deploy once the GitHub connection is active. Netlify can build Deploy Previews from pull requests with the same configuration. Each deploy preview has its own origin and local progress.
+For sign-in and sync, set both `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` in the production build environment. Keep both hosts on the same Supabase project and configure callback URLs in [Account sync](ACCOUNT_SYNC.md#configure-authentication-on-both-hosts). Preview deployments have separate origins and build variables.
 
-### Restrict access
+Pages serves the React Router app shell for nested routes through its default SPA fallback. Keep the build free of a top-level `404.html` to retain this behavior. The app uses static hosting and talks directly to Supabase. Vite copies `public/_headers` to `dist/_headers` for immutable caching of hashed assets and revalidation of the service worker and manifest. Leave HTML and navigation on their default cache policy so a new deployment can load its new bundle. [Pages serving behavior](https://developers.cloudflare.com/pages/configuration/serving-pages/) · [Pages custom headers](https://developers.cloudflare.com/pages/configuration/headers/)
+
+Pages Free allows 500 builds per month, including Git preview builds, with one concurrent build and a 20-minute timeout. The output can contain up to 20,000 files, with a limit of 25 MiB per asset. Inspect `dist` before adding a large batch of artwork. [Pages limits](https://developers.cloudflare.com/pages/platform/limits/)
+
+### Netlify
+
+Import the same GitHub repository in [Netlify](https://app.netlify.com/) and select `main`. `netlify.toml` configures Node.js 22, the build, and the SPA rewrite. Netlify also reads `dist/_headers`. Set the two Supabase variables for production builds to enable the same account features. Netlify Deploy Previews can use the same build settings. [Netlify custom headers](https://docs.netlify.com/manage/routing/headers/)
+
+When checking either deployment, directly open and refresh `/timeline`, `/database/agents`, an Agent profile, and `/profile/account` if sign-in is enabled. Check that the manifest and service worker load, and that local progress survives a refresh. Authenticate with a test account before relying on sync at a new domain.
+
+### Restrict access on Netlify
 
 On plans with project visibility controls, open the Netlify project and choose **Project configuration → General → Visitor access → Project visibility → Private**. Save the setting, review team memberships and project invitations, then open the production URL in a signed-out browser to confirm it prompts for Netlify login. Private visibility admits the Netlify team and invited viewers. Restrict team access and invitations if only you should be able to open the site. A public URL is accessible to anyone who obtains it. Netlify visibility does not change your GitHub repository’s visibility. [Netlify project visibility](https://docs.netlify.com/manage/security/secure-access-to-sites/project-visibility/)
 
