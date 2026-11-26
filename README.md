@@ -107,7 +107,7 @@ When checking either deployment, directly open and refresh `/timeline`, `/databa
 
 The build renders the homepage introduction and the three policy routes into HTML. React uses the same policy text. Preview edits by opening `/privacy`, `/terms`, and `/code-of-conduct` directly in a signed-out browser.
 
-Review and approve the Privacy Policy and Terms of Service before publishing. Confirm who handles privacy requests and how to arrange private follow-up. The repository can verify the app’s data flows and the account deletion cascade. Provider-side logging, analytics or security cookies, mail delivery, backup retention, and the deletion process need maintainer review.
+Review and approve the Privacy Policy and Terms of Service before publishing. Privacy requests go to [support@zenlessentials.org](mailto:support@zenlessentials.org). General inquiries go to [contact@zenlessentials.org](mailto:contact@zenlessentials.org). The repository can verify the app’s data flows and the account deletion cascade. Provider-side logging, analytics or security cookies, mail delivery, backup retention, and the deletion process need maintainer review.
 
 After the approved pages are live, open **Google Auth Platform → Branding** and list the homepage as `https://zenlessentials.org/`, the Privacy Policy as `https://zenlessentials.org/privacy`, and the Terms of Service as `https://zenlessentials.org/terms`. Open each signed out before submitting branding changes for verification. [Google OAuth policies](https://developers.google.com/identity/protocols/oauth2/policies)
 

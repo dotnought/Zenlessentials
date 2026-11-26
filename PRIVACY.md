@@ -34,4 +34,4 @@ The app has no automatic expiration for account records or cloud saves and no in
 
 ## Privacy requests
 
-To request access, correction, deletion, or to ask about other privacy rights that apply to you, open a [GitHub issue](https://github.com/dotnought/Zenlessentials/issues/new) asking the maintainers for a private follow-up. The issue is public. Leave out your account email, user ID, sign-in links, codes, backups, and any other private information. The maintainers may need to verify that you control the account before acting on a request.
+To request access, correction, or deletion, or to ask about other privacy rights that apply to you, email [support@zenlessentials.org](mailto:support@zenlessentials.org). We use your email address and the details you share to respond to your request. We may need to verify that you control the account before acting on it. Keep sign-in links, verification codes, and save backups out of your message.

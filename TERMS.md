@@ -22,4 +22,4 @@ To the extent permitted by applicable law, the service is provided as is, withou
 
 ## Privacy and contact
 
-The [Privacy Policy](/privacy) explains sign-in, storage, synchronization, and privacy requests. For questions about the project or these terms, use the [GitHub issue tracker](https://github.com/dotnought/Zenlessentials/issues). Keep personal account information out of public issues.
+The [Privacy Policy](/privacy) explains sign-in, storage, synchronization, and privacy requests. For general inquiries or questions about these terms, email [contact@zenlessentials.org](mailto:contact@zenlessentials.org). Use the [GitHub issue tracker](https://github.com/dotnought/Zenlessentials/issues) for public bug reports and keep personal account information out of issues.
