@@ -72,7 +72,8 @@ export function policyPages(): Plugin {
         for (const path of policyPaths) {
           const { title, description } = policies[path]
           const body = readPolicy(path)
-          const content = `<main class="static-intro"><article class="policy-document panel"><h1>${title}</h1><div class="policy-copy">${body}</div></article><nav class="policy-links" aria-label="Project policies"><a href="/">Zenlessentials home</a> ${links}</nav></main>`
+          // Keep the public policy contacts usable without Cloudflare's email decoder.
+          const content = `<main class="static-intro"><article class="policy-document panel"><h1>${title}</h1><div class="policy-copy"><!--email_off-->${body}<!--/email_off--></div></article><nav class="policy-links" aria-label="Project policies"><a href="/">Zenlessentials home</a> ${links}</nav></main>`
           this.emitFile({ type: 'asset', fileName: path.slice(1) + '.html', source: pageHtml(template, title + ' — Zenlessentials', description, path, content) })
         }
       },
