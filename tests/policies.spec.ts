@@ -7,17 +7,17 @@ const pages = [
   { path: '/code-of-conduct', title: 'Code of Conduct', section: 'Reporting and enforcement' },
 ]
 
-test('serves the homepage and complete public policy HTML with canonical metadata before scripts run', async ({ browser, baseURL }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false, baseURL })
-  try {
-    const page = await context.newPage()
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false })
+
+  test('serves the homepage and complete public policy HTML with canonical metadata', async ({ page }) => {
     await page.goto('/')
     await expect(page.getByRole('heading', { name: 'Zenlessentials', level: 1 })).toBeVisible()
     await expect(page.getByText(/Track the story, look up Agents and equipment, and build squads/)).toBeVisible()
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', official + '/')
 
     for (const { path, title, section } of pages) {
-      await page.getByRole('link', { name: title }).click()
+      await page.getByRole('navigation', { name: 'Project policies' }).getByRole('link', { name: title }).click()
       await expect(page).toHaveURL(path)
       await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
       await expect(page.getByRole('heading', { name: section, level: 2 })).toBeVisible()
@@ -26,9 +26,7 @@ test('serves the homepage and complete public policy HTML with canonical metadat
       await page.reload()
       await expect(page.getByRole('heading', { name: title, level: 1 })).toBeVisible()
     }
-  } finally {
-    await context.close()
-  }
+  })
 })
 
 test('opens policy links within the app and preserves theme and offline access', async ({ page, context }) => {

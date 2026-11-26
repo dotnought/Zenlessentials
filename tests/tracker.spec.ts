@@ -21,7 +21,7 @@ test('opens Dashboard as home and shows artwork on the main sections', async ({ 
   await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible()
   const footer = page.locator('.site-footer')
   await expect(footer.getByRole('link', { name: 'This site is powered by Netlify' })).toHaveAttribute('href', 'https://www.netlify.com/')
-  await expect(footer.getByRole('link', { name: 'Code of Conduct' })).toHaveAttribute('href', 'https://github.com/dotnought/Zenlessentials/blob/main/CODE_OF_CONDUCT.md')
+  await expect(footer.getByRole('link', { name: 'Code of Conduct' })).toHaveAttribute('href', '/code-of-conduct')
   const dashboardNav = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link', { name: 'Dashboard' })
   await expect(dashboardNav).toHaveAttribute('aria-current', 'page')
   for (const [route, name] of [['dashboard', 'Dashboard'], ['library', 'Content Library'], ['profile', 'Profile'], ['settings', 'Settings']]) {
